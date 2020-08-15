@@ -3,20 +3,18 @@
         <el-container>
             <el-aside class="app-side app-side-left"
                       :class="isCollapse ? 'app-side-collapsed' : 'app-side-expanded'">
-                <el-dropdown
-                        trigger="hover"
-                        :hide-on-click="false" >
-                                <span class="el-dropdown-link">
-
-                                    <div class="block"><el-avatar :size="50" :src="circleUrl"></el-avatar></div>
-                                    <div class="block" v-for="size in sizeList" :key="size">
-                                       <el-avatar :size="size" :src="circleUrl"></el-avatar>
-                                    </div>
-                                    <!--                <i class="el-icon-arrow-down el-icon&#45;&#45;right"></i>-->
-                                </span>
+                <el-dropdown trigger="hover"
+                             :hide-on-click="false">
+              <span class="el-dropdown-link">
+                <div class="block"><el-avatar :size="50" :src="circleUrl"></el-avatar></div>
+                <div class="block" v-for="size in sizeList" :key="size">
+                  <el-avatar :size="size" :src="circleUrl"></el-avatar>
+                </div>
+                  <!--                <i class="el-icon-arrow-down el-icon&#45;&#45;right"></i>-->
+              </span>
                     <el-dropdown-menu slot="dropdown">
                         <el-dropdown-item>{{username}}</el-dropdown-item>
-                        <el-dropdown-item>我的消息</el-dropdown-item>
+                        <el-dropdown-item divided>我的消息</el-dropdown-item>
                         <el-dropdown-item>设置</el-dropdown-item>
                         <el-dropdown-item divided
                                           @click.native="logout">退出登录</el-dropdown-item>
@@ -46,13 +44,11 @@
                         <!--                                <el-menu-item index="1-4-1">选项1</el-menu-item>-->
                         <!--                            </el-submenu>-->
                         <!--                        </el-submenu>-->
-                        <el-button round @click="gotoCreateDoc">新建文档</el-button>
-                        <el-button type="primary" round>使用模板</el-button>
                         <el-menu-item index="1">
                             <i class="el-icon-s-platform"></i>
                             <span slot="title">工作台</span>
                         </el-menu-item>
-                        <el-menu-item index="2" @click="gotoDesktop">
+                        <el-menu-item index="2">
                             <i class="el-icon-menu"></i>
                             <span slot="title">我的桌面</span>
                         </el-menu-item>
@@ -60,8 +56,8 @@
                             <i class="el-icon-document"></i>
                             <span slot="title">团队空间</span>
                         </el-menu-item>
-                        <el-menu-item index="4" @click="gotoBin">
-                            <i class="el-icon-delete" ></i>
+                        <el-menu-item index="4">
+                            <i class="el-icon-delete"></i>
                             <span slot="title">回收站</span>
                         </el-menu-item>
                     </el-menu>
@@ -113,7 +109,6 @@
                         <!--              </div>-->
                         <!--            </el-col>-->
 
-
                     </el-menu>
 
                     <!--          <div class="app-header-userinfo">-->
@@ -161,18 +156,19 @@
                                 fixed="right"
                                 label="操作"
                                 width="180">
-                            <template slot-scope="scope">
-                                <el-button type="text" size="small">查看</el-button>
-                                <el-button type="text" size="small">编辑</el-button>
-                                <el-button type="text" size="small" @click="deleteDoc">删除文档</el-button>
-                                <el-button type="text" size="small" @click="share(scope.$index, scope.row)">分享</el-button>
-                            </template>
+                                                        <template slot-scope="scope">
+                            <el-button type="text" size="small">查看</el-button>
+                            <el-button type="text" size="small">编辑</el-button>
+                            <el-button type="text" size="small">删除文档</el-button>
+                            <el-button type="text" size="small" @click="share(scope.$index, scope.row)">分享</el-button>
+
+
+                                                        </template>
                         </el-table-column>
 
                     </el-table>
-
                     <el-dialog
-                            title="提示:将文档ID分享给他人"
+                            title="提示:将文档ID分享给他人即可分享文档"
                             :visible.sync="dialogVisible"
                             width="30%"
                             :before-close="handleCloseDialog">
@@ -180,11 +176,9 @@
                         <el-radio v-model="radio" label="1">仅查看</el-radio>
                         <el-radio v-model="radio" label="2">可编辑</el-radio>
                         <br><br>
-                        文档名：
-                        <el-input v-model="editObj.address" :disabled="true"></el-input>
+                        <span>文档名：{{tableData}}</span>
                         <br><br>
-                        文档ID：
-                        <el-input v-model="editObj.id" :disabled="true"></el-input>
+                        <span>文档ID：</span>
 <!--                        <br><br>-->
                         <span slot="footer" class="dialog-footer">
                                     <el-button @click="dialogVisible = false">取 消</el-button>
@@ -206,43 +200,34 @@
         data() {
             return {
                 username: '',
+                sizeList:'',
                 isCollapse: false,
                 circleUrl: "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
                 tableData: [{
                     date: '2016-05-02',
                     name: '我',
-                    address: '测试文档一',
-                    id:'6'
+                    address: '测试文档一'
                 }, {
                     date: '2016-05-04',
                     name: '我',
-                    address: '测试文档二',
-                    id:'7'
+                    address: '测试文档二'
                 }],
                 navList:[
                     {name:'/Recent',navItem:'最近文件'},
                     {name:'/User',navItem:'我创建的文件'},
                 ],
-                editObj:{
-                    date: '',
-                    name: '',
-                    address: '',
-                    id:''
-                },
                 dialogVisible: false,
                 radio: '1'
             }
         },
 
         methods: {
-            toggleSideBar() {
-                this.isCollapse = !this.isCollapse
-            },
             share: function(index, row){
                 this.dialogVisible=true;
-                console.log(index,row.id);
-                this.listIndex=index;
-                this.editObj=row
+                console.log(index,row.name);
+    },
+            toggleSideBar() {
+                this.isCollapse = !this.isCollapse
             },
             logout: function () {
                 this.$confirm('确认退出?', '提示', {})
@@ -266,50 +251,12 @@
                     path: "/Recent"
                 });
             },
-            gotoDesktop() {
-                this.$router.push({
-                    path: "/Desktop"
-                });
-            },
-            gotoBin() {
-                this.$router.push({
-                    path: "/Bin"
-                });
-            },
-            gotoCreateDoc() {
-                this.$router.push({
-                    path: "/CreateDoc"
-                });
-            },
-            deleteDoc() {
-                this.$axios.post('',{
-                    id:this.tableData.id,
-                    del:true,
-                })
-                    // eslint-disable-next-line no-unused-vars
-                    .then(response => {
-                        this.$router.push({path: '/User'})
-                        window.location.reload()
-                        // if (response.data.status === 0) {
-                        //     this.$router.push({path: '/Recent'})
-                        //     window.location.reload()
-                        // } else {
-                        //     return false
-                        // }
-                    })
-            },
             handleCloseDialog(done) {
                 this.$confirm('确认关闭？')
                     .then(() => {
                         done();
                     })
                     .catch(() => {});
-            },
-            handleEdit(index, row) {
-                console.log(index, row);
-            },
-            handleDelete(index, row) {
-                console.log(index, row);
             }
         },
         mounted: function () {

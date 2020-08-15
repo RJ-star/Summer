@@ -112,8 +112,8 @@
 
                 <el-main class="app-body">
                     <el-table
+
                             :data="tableData"
-                            stripe
                             style="width: 100%">
                         <el-table-column
                                 prop="date"
@@ -137,7 +137,7 @@
 <!--                            <template slot-scope="scope">-->
                                 <el-button type="text" size="small">查看</el-button>
                                 <el-button type="text" size="small">编辑</el-button>
-                                <el-button type="text" size="small">删除记录</el-button>
+                                <el-button type="text" size="small" @click="deleteHistory">删除记录</el-button>
 
 <!--                            </template>-->
                         </el-table-column>
@@ -163,19 +163,23 @@
                 tableData: [{
                     date: '2016-05-02',
                     name: '我',
-                    address: '测试文档一'
+                    address: '测试文档一',
+                    id:'1'
                 }, {
                     date: '2016-05-04',
                     name: '我',
-                    address: '测试文档二'
+                    address: '测试文档二',
+                    id:'2'
                 }, {
                     date: '2016-05-01',
                     name: '我',
-                    address: '测试文档三'
+                    address: '测试文档三',
+                    id:'3'
                 }, {
                     date: '2016-05-03',
                     name: '我',
-                    address: '测试文档四'
+                    address: '测试文档四',
+                    id:'4'
                 }],
                 navList:[
                     {name:'/Recent',navItem:'最近文件'},
@@ -224,7 +228,37 @@
                 this.$router.push({
                     path: "/CreateDoc"
                 });
+            },
+            deleteHistory() {
+                this.$axios.post('',{
+                    id:this.tableData.id,
+                    del:true,
+                })
+                    // eslint-disable-next-line no-unused-vars
+                .then(response => {
+                    this.$router.push({path: '/Recent'})
+                    window.location.reload()
+                    // if (response.data.status === 0) {
+                    //     this.$router.push({path: '/Recent'})
+                    //     window.location.reload()
+                    // } else {
+                    //     return false
+                    // }
+                })
             }
+        },
+        created(){
+            this.$axios.get('')
+                //then获取成功；response成功后的返回值（对象）
+                .then(response=>{
+                    console.log(response);
+                    this.tableData=response.data;
+                })
+                //获取失败
+                .catch(error=>{
+                    console.log(error);
+                    alert('网络错误，不能访问');
+                })
         },
         mounted: function () {
             let user = sessionStorage.getItem('user');
