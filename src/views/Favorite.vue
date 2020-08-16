@@ -80,10 +80,10 @@
                              class="el-menu-demo tab-page"
                              router mode="horizontal"
                              @select="handleSelect"
-                             >
-                            <el-menu-item v-for="(item,i) in navList" :key="i" :index="item.name">
-                                {{ item.navItem }}
-                            </el-menu-item>
+                    >
+                        <el-menu-item v-for="(item,i) in navList" :key="i" :index="item.name">
+                            {{ item.navItem }}
+                        </el-menu-item>
                         <!--                        <el-submenu index="2">-->
                         <!--                            <template slot="title">我的工作台</template>-->
                         <!--                            <el-menu-item index="2-1">选项1</el-menu-item>-->
@@ -162,11 +162,12 @@
                                 label="操作"
                                 width="180">
                             <template slot-scope="scope">
-<!--                                <el-button type="text" size="small">查看</el-button>-->
+                                <!--                                <el-button type="text" size="small">查看</el-button>-->
+                                <el-button type="text" size="small" @click="browserDoc(scope.$index, scope.row)">查看</el-button>
                                 <el-button type="text" size="small" @click="editDoc(scope.$index, scope.row)">编辑</el-button>
-                                <el-button type="text" size="small" @click="deleteDoc(scope.$index, scope.row)">删除文档</el-button>
-                                <el-button type="text" size="small" @click="share(scope.$index, scope.row)">分享</el-button>
-                                <el-button type="text" size="small" @click="favorite(scope.$index, scope.row)">收藏</el-button>
+                                <el-button type="text" size="small" @click="deleteFavorite(scope.$index, scope.row)">取消收藏</el-button>
+<!--                                <el-button type="text" size="small" @click="deleteDoc(scope.$index, scope.row)">删除文档</el-button>-->
+<!--                                <el-button type="text" size="small" @click="share(scope.$index, scope.row)">分享</el-button>-->
                             </template>
                         </el-table-column>
 
@@ -190,18 +191,18 @@
                         <span>评论权限</span>
                         <el-radio v-model="radio3" label="1">有</el-radio>
                         <el-radio v-model="radio3" label="0">无</el-radio>
-<!--                        <el-radio v-model="radio" label="1">仅查看</el-radio>-->
-<!--                        <el-radio v-model="radio" label="2">可编辑</el-radio>-->
+                        <!--                        <el-radio v-model="radio" label="1">仅查看</el-radio>-->
+                        <!--                        <el-radio v-model="radio" label="2">可编辑</el-radio>-->
                         <br><br>
                         文档名：
                         <el-input v-model="editObj.address" :disabled="true"></el-input>
                         <br><br>
                         文档ID：
-                        <el-input v-model="editObj.id" :disabled="true"></el-input>
-<!--                        <br><br>-->
+                        <el-input v-model="editObj.favorite_id" :disabled="true"></el-input>
+                        <!--                        <br><br>-->
                         <span slot="footer" class="dialog-footer">
                                     <el-button @click="dialogVisible = false">取 消</el-button>
-                                    <el-button type="primary" @click="dialogVisible = false, checkShare(editObj.id)">确 定</el-button>
+                                    <el-button type="primary" @click="dialogVisible = false, checkShare(editObj.favorite_id)">确 定</el-button>
                         </span>
                     </el-dialog>
                     <template>
@@ -224,29 +225,25 @@
                 circleUrl: "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
                 tableData: [{
                     id:'',
-                    address:''
+                    address: '',
+                    favorite_id:''
                 }],
                 temp:{
-                  id:'',
-                  address:''
+                    id:'',
+                    address:'',
+                    favorite_id:''
                 },
-            // {
-            //     address: '测试文档一',
-            //         id:'6'
-            // }, {
-            //     address: '测试文档二',
-            //         id:'7'
-            // }
                 navList:[
                     {name:'/Recent',navItem:'最近文件'},
                     {name:'/User',navItem:'我创建的文件'},
                     {name:'/Favorite',navItem:'我的收藏'}
                 ],
                 editObj:{
-                    date: '',
-                    name: '',
+                    // date: '',
+                    // name: '',
                     address: '',
-                    id:''
+                    id:'',
+                    favorite_id:''
                 },
                 dialogVisible: false,
                 radio1: '1',
@@ -297,21 +294,8 @@
                     path: "/CreateDoc"
                 });
             },
-            favorite(index,row){
-                console.log(row.id);
-                axios.post('/apis/user/add_favorite',{
-                    add_favorite:"add_favorite",
-                    file_id:row.id
-                })
-                .then(response=>{
-                    if (response.data.status===1)
-                        alert('收藏成功')
-                    else if (response.data.status===0)
-                        alert('你已经收藏了此文档')
-                    else alert('收藏失败，请稍后再试')
-                })
-            },
             share(index, row){
+
                 this.dialogVisible=true;
                 console.log(row.id);
                 this.listIndex=index;
@@ -325,44 +309,96 @@
                     shareFile: "shareFile",
                     file_id:id
                 })
+                    .then(response=>{
+                        if (response.data.status===0) {
+                            axios.post('/apis/user/setGeneralAuthority',{
+                                setGenAuthor: "setGenAuthor",
+                                file_id:id,
+                                read_file:1,
+                                write_file:this.radio1,
+                                share_file:this.radio2,
+                                review_file:this.radio3
+                            })
+                        }
+                        else {
+                            console('Wrong')
+                            alert('分享失败')
+                        }
+                    })
+            },
+            deleteFavorite(index,row){
+              console.log(index,row.id)
+              axios.post('/apis/user/delete_favorite',{
+                  delete_favorite: "delete_favorite",
+                  favorite_id:row.id
+              })
                 .then(response=>{
-                    if (response.data.status===0) {
-                        axios.post('/apis/user/setGeneralAuthority',{
-                            setGenAuthor: "setGenAuthor",
-                            file_id:id,
-                            read_file:1,
-                            write_file:this.radio1,
-                            share_file:this.radio2,
-                            review_file:this.radio3
-                        })
-                    }
-                    else {
-                        console('Wrong')
-                        alert('分享失败')
-                    }
+                    if (response.data.status===0)
+                        alert('取消收藏成功')
+                    else alert('取消收藏失败，请稍后再试')
                 })
             },
-            deleteDoc(index,row) {
-                console.log(row.id)
-                axios.post('/apis/user/moveto_recyclebin',{
-                    delete_file: "delete_file",
-                    file_id:row.id,
+            browserDoc(index, row){
+                console.log(index,row.id)
+                axios.post('/apis/user/checkSpecificAuthority',{
+                    checkSpecificAuthority:"checkSpecificAuthority",
+                    file_id:row.id
                 })
-                    // eslint-disable-next-line no-unused-vars
-                    .then(response => {
+                    .then(response=>{
                         if (response.data.status===0) {
-                            alert('删除成功')
-                            this.$router.push({path: '/User'})
-                            window.location.reload()
+                            if (response.data.read===0) {
+                                console.log('Wrong')
+                                this.$router.push({path: '/ops'})
+                            }
+                            else {
+                                console.log('success')
+                                axios.post('/apis/user/fileEditStatus',{
+                                    freeFile: "freeOrNot",
+                                    file_id:row.id
+                                })
+                                    .then(re=>{
+                                        if (re.data.status===1) {
+                                            console.log('Wrong')
+                                            this.$router.push({path: '/ops'})
+                                        }
+                                        else {
+                                            console.log('success')
+                                            //jump
+                                        }
+                                    })
+                            }
                         }
-                        else
-                            alert('删除失败，请稍后再试')
-                        // if (response.data.status === 0) {
-                        //     this.$router.push({path: '/Recent'})
-                        //     window.location.reload()
-                        // } else {
-                        //     return false
-                        // }
+
+                        if (response.data.status===1) {//验证通用权限
+                            axios.post('/apis/user/checkGeneralAuthority',{
+                                checkGerneralAuthority:"checkGerneralAuthority",
+                                file_id:row.id
+                            })
+                                .then(res=>{
+                                    if (res.data.status===0) {
+                                        console.log('success')
+                                        axios.post('/apis/user/fileEditStatus',{
+                                            freeFile: "freeOrNot",
+                                            file_id:row.id
+                                        })
+                                            .then(re=>{
+                                                if (re.data.status===1) {
+                                                    console.log('Wrong')
+                                                    this.$router.push({path: '/ops'})
+                                                }
+                                                else {
+                                                    console.log('success')
+                                                    //jump
+                                                }
+                                            })
+                                    }
+                                    else {
+                                        console.log('Wrong')
+                                        this.$router.push({path: '/ops'})
+                                    }
+                                })
+                        }
+
                     })
             },
             editDoc(index,row) {
@@ -445,19 +481,21 @@
         created(){
             axios.post('/apis/user/getstatus')
                 .then(res=>{
-                    if (res.data.status===0) {
+                    if (res.status===0) {
                         this.username=res.data.username
-                        axios.post('/apis/user/myFile',{
-                            myfile: "myfile"
+                        axios.post('/apis/user/my_favorite',{
+                            my_favorite: "my_favorite"
                         })
                             //then获取成功；response成功后的返回值（对象）
                             .then(response=>{
                                 console.log(response);
                                 this.tableData.pop();
-                                for (let i=0, len=response.data.fileNameSet.length;i<len;i++) {
-                                    this.temp.id=response.data.fileIdSet[i];
-                                    this.temp.address=response.data.fileNameSet[i];
-                                    this.tableData.push({id:this.temp.id,address:this.temp.address})
+
+                                for (let i=0,len=response.data.namelist.length;i<len;i++) {
+                                    this.temp.id=response.data.fileIdList[i];
+                                    this.temp.favorite_id=response.data.favoriteIdlist[i];
+                                    this.temp.address=response.data.namelist[i];
+                                    this.tableData.push({id:this.temp.id,address: this.temp.address,favorite_id: this.temp.favorite_id})
                                 }
                             })
                             //获取失败

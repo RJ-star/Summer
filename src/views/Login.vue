@@ -69,7 +69,7 @@
             submitForm: function(formName) {
                 this.$refs[formName].validate(valid => {
                     if (valid) {
-                        this.$axios.post("/apis/login",{
+                        this.$axios.post("/apis/user/login",{
                             email:this.ruleForm2.email,
                             password:this.ruleForm2.password,
                         })

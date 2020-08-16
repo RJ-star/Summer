@@ -115,16 +115,16 @@
 
                             :data="tableData"
                             style="width: 100%">
-                        <el-table-column
-                                prop="date"
-                                label="日期"
-                                width="180">
-                        </el-table-column>
-                        <el-table-column
-                                prop="name"
-                                label="操作人"
-                                width="180">
-                        </el-table-column>
+<!--                        <el-table-column-->
+<!--                                prop="date"-->
+<!--                                label="日期"-->
+<!--                                width="180">-->
+<!--                        </el-table-column>-->
+<!--                        <el-table-column-->
+<!--                                prop="name"-->
+<!--                                label="操作人"-->
+<!--                                width="180">-->
+<!--                        </el-table-column>-->
                         <el-table-column
                                 prop="address"
                                 label="文档名">
@@ -134,12 +134,13 @@
                                 fixed="right"
                                 label="操作"
                                 width="150">
-<!--                            <template slot-scope="scope">-->
-                                <el-button type="text" size="small">查看</el-button>
-                                <el-button type="text" size="small">编辑</el-button>
-                                <el-button type="text" size="small" @click="deleteHistory">删除记录</el-button>
+                            <template slot-scope="scope">
+                                <el-button type="text" size="small" @click="browserDoc(scope.$index, scope.row)">查看</el-button>
+                                <el-button type="text" size="small" @click="editDoc(scope.$index, scope.row)">编辑</el-button>
+                                <el-button type="text" size="small" @click="favorite(scope.$index, scope.row)">收藏</el-button>
+<!--                                <el-button type="text" size="small" @click="deleteHistory">删除记录</el-button>-->
 
-<!--                            </template>-->
+                            </template>
                         </el-table-column>
                     </el-table>
 
@@ -153,6 +154,7 @@
 </template>
 
 <script>
+    import axios from 'axios'
     export default {
         name: 'Container',
         data() {
@@ -161,31 +163,31 @@
                 isCollapse: false,
                 circleUrl: "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
                 tableData: [{
-                    date: '2016-05-02',
-                    name: '我',
-                    address: '测试文档一',
-                    id:'1'
-                }, {
-                    date: '2016-05-04',
-                    name: '我',
-                    address: '测试文档二',
-                    id:'2'
-                }, {
-                    date: '2016-05-01',
-                    name: '我',
-                    address: '测试文档三',
-                    id:'3'
-                }, {
-                    date: '2016-05-03',
-                    name: '我',
-                    address: '测试文档四',
-                    id:'4'
+                    id:'',
+                    address:'',
                 }],
+            // {
+            //     address: '测试文档一',
+            //         id:'1'
+            // }, {
+            //     address: '测试文档二',
+            //         id:'2'
+            // }, {
+            //     address: '测试文档三',
+            //         id:'3'
+            // }, {
+            //     address: '测试文档四',
+            //         id:'777'
+            // }
                 navList:[
                     {name:'/Recent',navItem:'最近文件'},
                     {name:'/User',navItem:'我创建的文件'},
+                    {name:'/Favorite',navItem:'我的收藏'}
                 ],
-
+                temp:{
+                    id:'',
+                    address:''
+                }
             }
         },
         methods: {
@@ -229,36 +231,197 @@
                     path: "/CreateDoc"
                 });
             },
-            deleteHistory() {
-                this.$axios.post('',{
-                    id:this.tableData.id,
-                    del:true,
+            // deleteHistory() {
+            //     axios.post('',{
+            //         id:this.tableData.id,
+            //         del:true,
+            //     })
+            //         // eslint-disable-next-line no-unused-vars
+            //     .then(response => {
+            //         this.$router.push({path: '/Recent'})
+            //         window.location.reload()
+            //         // if (response.data.status === 0) {
+            //         //     this.$router.push({path: '/Recent'})
+            //         //     window.location.reload()
+            //         // } else {
+            //         //     return false
+            //         // }
+            //     })
+            // },
+            favorite(index,row){
+                console.log(row.id);
+                axios.post('/apis/user/add_favorite',{
+                    add_favorite:"add_favorite",
+                    file_id:row.id
                 })
-                    // eslint-disable-next-line no-unused-vars
-                .then(response => {
-                    this.$router.push({path: '/Recent'})
-                    window.location.reload()
-                    // if (response.data.status === 0) {
-                    //     this.$router.push({path: '/Recent'})
-                    //     window.location.reload()
-                    // } else {
-                    //     return false
-                    // }
+                    .then(response=>{
+                        if (response.data.status===1)
+                            alert('收藏成功')
+                        else if (response.data.status===0)
+                            alert('你已经收藏了此文档')
+                        else alert('收藏失败，请稍后再试')
+                    })
+            },
+            browserDoc(index, row){
+                console.log(index,row.id)
+                axios.post('/apis/user/checkSpecificAuthority',{
+                    checkSpecificAuthority:"checkSpecificAuthority",
+                    file_id:row.id
                 })
+                .then(response=>{
+                    if (response.data.status===0) {
+                        if (response.data.read===0) {
+                            console.log('Wrong')
+                            this.$router.push({path: '/ops'})
+                        }
+                        else {
+                            console.log('success')
+                            axios.post('/apis/user/fileEditStatus',{
+                                freeFile: "freeOrNot",
+                                file_id:row.id
+                            })
+                            .then(re=>{
+                                if (re.data.status===1) {
+                                    console.log('Wrong')
+                                    this.$router.push({path: '/ops'})
+                                }
+                                else {
+                                    console.log('success')
+                                    localStorage.setItem("searchParam", JSON.stringify(re.data));
+                                }
+                            })
+                        }
+                    }
+
+                    if (response.data.status===1) {//验证通用权限
+                        axios.post('/apis/user/checkGeneralAuthority',{
+                            checkGerneralAuthority:"checkGerneralAuthority",
+                            file_id:row.id
+                        })
+                        .then(res=>{
+                            if (res.data.status===0) {
+                                console.log('success')
+                                axios.post('/apis/user/fileEditStatus',{
+                                    freeFile: "freeOrNot",
+                                    file_id:row.id
+                                })
+                                    .then(re=>{
+                                        if (re.data.status===1) {
+                                            console.log('Wrong')
+                                            this.$router.push({path: '/ops'})
+                                        }
+                                        else {
+                                            console.log('success')
+                                            //jump
+                                        }
+                                    })
+                            }
+                            else {
+                                console.log('Wrong')
+                                this.$router.push({path: '/ops'})
+                            }
+                        })
+                    }
+
+                })
+            },
+            editDoc(index,row) {
+                console.log(index,row.id)
+                axios.post('/apis/user/checkSpecificAuthority',{
+                    checkSpecificAuthority:"checkSpecificAuthority",
+                    file_id:row.id
+                })
+                    .then(response=>{
+                        if (response.data.status===0) {
+                            if (response.data.write===0) {
+                                console.log('Wrong')
+                                this.$router.push({path: '/ops'})
+                            }
+                            else {
+                                console.log('success')
+                                axios.post('/apis/user/fileEditStatus',{
+                                    freeFile: "freeOrNot",
+                                    file_id:row.id
+                                })
+                                    .then(re=>{
+                                        if (re.data.status===1) {
+                                            console.log('Wrong')
+                                            this.$router.push({path: '/ops'})
+                                        }
+                                        else {
+                                            console.log('success')
+                                            //jump
+                                        }
+                                    })
+                            }
+                        }
+
+                        if (response.data.status===1) {//验证通用权限
+                            axios.post('/apis/user/checkGeneralAuthority',{
+                                checkGerneralAuthority:"checkGerneralAuthority",
+                                file_id:row.id
+                            })
+                                .then(res=>{
+                                    if (res.data.status===0) {
+                                        console.log('success')
+                                        axios.post('/apis/user/fileEditStatus',{
+                                            freeFile: "freeOrNot",
+                                            file_id:row.id
+                                        })
+                                            .then(re=>{
+                                                if (re.data.status===1) {
+                                                    console.log('Wrong')
+                                                    this.$router.push({path: '/ops'})
+                                                }
+                                                else {
+                                                    console.log('success')
+                                                    //jump
+                                                }
+                                            })
+                                    }
+                                    else {
+                                        console.log('Wrong')
+                                        this.$router.push({path: '/ops'})
+                                    }
+                                })
+                        }
+
+                    })
             }
         },
         created(){
-            this.$axios.get('')
-                //then获取成功；response成功后的返回值（对象）
-                .then(response=>{
-                    console.log(response);
-                    this.tableData=response.data;
-                })
-                //获取失败
-                .catch(error=>{
-                    console.log(error);
-                    alert('网络错误，不能访问');
-                })
+            axios.post('/apis/user/getstatus')
+            .then(res=>{
+                if (res.data.status===0) {
+                    this.username=res.data.username
+                    axios.post('/apis/user/recentBrowse',{
+                        recent: "recent"
+                    })
+                        //then获取成功；response成功后的返回值（对象）
+                        .then(response=>{
+                            console.log(response);
+                            this.tableData.pop();
+                            let vlist = {{ response.data.fileNameSet|safe }} ;
+                            // for (let i=0, len=response.data.fileNameSet.length;i<len;i++) {
+                            //     this.temp.id=response.data.fileIdSet[i];
+                            //     this.temp.address=response.data.fileNameSet[i];
+                            //     this.tableData.push({id:this.temp.id,address:this.temp.address})
+                            // }
+                        })
+                        //获取失败
+                        .catch(error=>{
+                            console.log(error);
+                            alert('网络错误，请稍后尝试');
+                        })
+                }
+                else {
+                    this.$router.push({
+                        path: "/login"
+                    })
+                    alert('请登录')
+                }
+            })
+
         },
         mounted: function () {
             let user = sessionStorage.getItem('user');

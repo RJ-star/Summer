@@ -1,7 +1,15 @@
 <template>
     <div>
-<!--        <el-header>Header</el-header>-->
-
+        <!--        <el-header>Header</el-header>-->
+        <el-alert
+                title="提示"
+                type="info"
+                description="编辑模式"
+                :closable="false"
+                center
+                show-icon>
+        </el-alert>
+        <br>
         <el-button type="primary" round @click="save">保存</el-button>
         <el-button type="info" round @click="back">返回</el-button>
         <br><br>
@@ -56,17 +64,13 @@
                 return str;
             },
             save: function() {
-                axios.post("/apis/user/createDoc",{
-                    upload:"upload",
-                    content:this.docData.content,
-                    file_name:this.docData.file_name
-                },
-                console.log(this.docData.file_name),
-                    console.log(this.docData.content))
+                axios.post('apis/user/postModifiedFile',{
 
-                .then(response => {
-                console.log(response)
-                })
+                    })
+
+                    .then(response => {
+                        console.log(response)
+                    })
 
                 // let data={"content":this.content};
                 // console.log(this.content)
@@ -92,10 +96,10 @@
                 return this.$refs.myTextEditor.quill
             }
         },
-        activated(){
+        created(){
             axios.post('apis/user/get_status')
                 .then(res=>{
-                    if (res.status===0) {
+                    if (res.data.status===0) {
                         this.username=res.data.username
                         axios.post('apis/user/recentBrowse')
                             //then获取成功；response成功后的返回值（对象）
@@ -127,6 +131,6 @@
 </script>
 <style>
     .quill-editor {
-        height: 450px;
+        height: 400px;
     }
 </style>
