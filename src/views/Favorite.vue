@@ -173,38 +173,38 @@
 
                     </el-table>
 
-                    <el-dialog
-                            title="提示:将文档ID分享给他人"
-                            :visible.sync="dialogVisible"
-                            width="30%"
-                            :before-close="handleCloseDialog">
-                        <span>设置文档权限（默认开启查看权限）：</span>
-                        <br><br>
-                        <span>编辑权限</span>
-                        <el-radio v-model="radio1" label="1">有</el-radio>
-                        <el-radio v-model="radio1" label="0">无</el-radio>
-                        <br><br>
-                        <span>分享权限</span>
-                        <el-radio v-model="radio2" label="1">有</el-radio>
-                        <el-radio v-model="radio2" label="0">无</el-radio>
-                        <br><br>
-                        <span>评论权限</span>
-                        <el-radio v-model="radio3" label="1">有</el-radio>
-                        <el-radio v-model="radio3" label="0">无</el-radio>
-                        <!--                        <el-radio v-model="radio" label="1">仅查看</el-radio>-->
-                        <!--                        <el-radio v-model="radio" label="2">可编辑</el-radio>-->
-                        <br><br>
-                        文档名：
-                        <el-input v-model="editObj.address" :disabled="true"></el-input>
-                        <br><br>
-                        文档ID：
-                        <el-input v-model="editObj.favorite_id" :disabled="true"></el-input>
-                        <!--                        <br><br>-->
-                        <span slot="footer" class="dialog-footer">
-                                    <el-button @click="dialogVisible = false">取 消</el-button>
-                                    <el-button type="primary" @click="dialogVisible = false, checkShare(editObj.favorite_id)">确 定</el-button>
-                        </span>
-                    </el-dialog>
+<!--                    <el-dialog-->
+<!--                            title="提示:将文档ID分享给他人"-->
+<!--                            :visible.sync="dialogVisible"-->
+<!--                            width="30%"-->
+<!--                            :before-close="handleCloseDialog">-->
+<!--                        <span>设置文档权限（默认开启查看权限）：</span>-->
+<!--                        <br><br>-->
+<!--                        <span>编辑权限</span>-->
+<!--                        <el-radio v-model="radio1" label="1">有</el-radio>-->
+<!--                        <el-radio v-model="radio1" label="0">无</el-radio>-->
+<!--                        <br><br>-->
+<!--                        <span>分享权限</span>-->
+<!--                        <el-radio v-model="radio2" label="1">有</el-radio>-->
+<!--                        <el-radio v-model="radio2" label="0">无</el-radio>-->
+<!--                        <br><br>-->
+<!--                        <span>评论权限</span>-->
+<!--                        <el-radio v-model="radio3" label="1">有</el-radio>-->
+<!--                        <el-radio v-model="radio3" label="0">无</el-radio>-->
+<!--                        &lt;!&ndash;                        <el-radio v-model="radio" label="1">仅查看</el-radio>&ndash;&gt;-->
+<!--                        &lt;!&ndash;                        <el-radio v-model="radio" label="2">可编辑</el-radio>&ndash;&gt;-->
+<!--                        <br><br>-->
+<!--                        文档名：-->
+<!--                        <el-input v-model="editObj.address" :disabled="true"></el-input>-->
+<!--                        <br><br>-->
+<!--                        文档ID：-->
+<!--                        <el-input v-model="editObj.favorite_id" :disabled="true"></el-input>-->
+<!--                        &lt;!&ndash;                        <br><br>&ndash;&gt;-->
+<!--                        <span slot="footer" class="dialog-footer">-->
+<!--                                    <el-button @click="dialogVisible = false">取 消</el-button>-->
+<!--                                    <el-button type="primary" @click="dialogVisible = false, checkShare(editObj.favorite_id)">确 定</el-button>-->
+<!--                        </span>-->
+<!--                    </el-dialog>-->
                     <template>
                         <router-view/>
                     </template>
@@ -249,6 +249,7 @@
                 radio1: '1',
                 radio2: '1',
                 radio3: '1',
+                tmp:''
             }
         },
 
@@ -261,7 +262,7 @@
                 this.$confirm('确认退出?', '提示', {})
                     .then(() => {
                         sessionStorage.removeItem('user');
-                        this.$router.push('/login');
+                        this.$router.push('/user/login');
                     })
                     .catch(() => { });
             },
@@ -276,22 +277,22 @@
             },
             gotoRecent() {
                 this.$router.push({
-                    path: "/Recent"
+                    path: "/user/Recent"
                 });
             },
             gotoDesktop() {
                 this.$router.push({
-                    path: "/Desktop"
+                    path: "/user/Desktop"
                 });
             },
             gotoBin() {
                 this.$router.push({
-                    path: "/Bin"
+                    path: "/user/Bin"
                 });
             },
             gotoCreateDoc() {
                 this.$router.push({
-                    path: "/CreateDoc"
+                    path: "/user/CreateDoc"
                 });
             },
             share(index, row){
@@ -330,12 +331,21 @@
               console.log(index,row.id)
               axios.post('/apis/user/delete_favorite',{
                   delete_favorite: "delete_favorite",
-                  favorite_id:row.id
+                  favorite_id:row.favorite_id
               })
                 .then(response=>{
                     if (response.data.status===0)
+                    {
                         alert('取消收藏成功')
-                    else alert('取消收藏失败，请稍后再试')
+                        this.$router.push({path: "/user/Favorite"});
+                        window.location.reload()
+                    }
+                        
+                    else {
+                        console.log(response.data.status)
+                        alert('取消收藏失败，请稍后再试')
+                        
+                    }
                 })
             },
             browserDoc(index, row){
@@ -348,7 +358,7 @@
                         if (response.data.status===0) {
                             if (response.data.read===0) {
                                 console.log('Wrong')
-                                this.$router.push({path: '/ops'})
+                                this.$router.push({path: '/user/ops'})
                             }
                             else {
                                 console.log('success')
@@ -359,11 +369,32 @@
                                     .then(re=>{
                                         if (re.data.status===1) {
                                             console.log('Wrong')
-                                            this.$router.push({path: '/ops'})
+                                            this.$router.push({path: '/user/ops'})
                                         }
                                         else {
                                             console.log('success')
                                             //jump
+                                            localStorage.setItem('file_id',re.data.file_id)
+                                            axios.post('/apis/user/applyEditFile',{
+                                                editFile:"editFile",
+                                                file_id:localStorage.getItem('file_id')
+                                            })
+                                                //then获取成功；response成功后的返回值（对象）
+                                                .then(response=>{
+                                                    console.log(response);
+                                                    this.tmp=response.data.file_text;
+                                                })
+                                                //获取失败
+                                                .catch(error=>{
+                                                    console.log(error);
+                                                    alert('网络错误，请稍后尝试');
+                                                })
+                                            localStorage.setItem('text',this.tmp)
+                                            axios.post('/apis/user/postModifiedFile',{
+                                                browseFile:'browseFile',
+                                                file_id:localStorage.getItem('file_id')
+                                            })
+                                            this.$router.push({path:'/user/browser'})
                                         }
                                     })
                             }
@@ -384,17 +415,38 @@
                                             .then(re=>{
                                                 if (re.data.status===1) {
                                                     console.log('Wrong')
-                                                    this.$router.push({path: '/ops'})
+                                                    this.$router.push({path: '/user/ops'})
                                                 }
                                                 else {
                                                     console.log('success')
                                                     //jump
+                                                    localStorage.setItem('file_id',re.data.file_id)
+                                                    axios.post('/apis/user/applyEditFile',{
+                                                        editFile:"editFile",
+                                                        file_id:localStorage.getItem('file_id')
+                                                    })
+                                                        //then获取成功；response成功后的返回值（对象）
+                                                        .then(response=>{
+                                                            console.log(response);
+                                                            this.tmp=response.data.file_text;
+                                                        })
+                                                        //获取失败
+                                                        .catch(error=>{
+                                                            console.log(error);
+                                                            alert('网络错误，请稍后尝试');
+                                                        })
+                                                    localStorage.setItem('text',this.tmp)
+                                                    axios.post('/apis/user/postModifiedFile',{
+                                                        browseFile:'browseFile',
+                                                        file_id:localStorage.getItem('file_id')
+                                                    })
+                                                    this.$router.push({path:'/user/browser'})
                                                 }
                                             })
                                     }
                                     else {
                                         console.log('Wrong')
-                                        this.$router.push({path: '/ops'})
+                                        this.$router.push({path: '/user/ops'})
                                     }
                                 })
                         }
@@ -411,7 +463,7 @@
                         if (response.data.status===0) {
                             if (response.data.write===0) {
                                 console.log('Wrong')
-                                this.$router.push({path: '/ops'})
+                                this.$router.push({path: '/user/ops'})
                             }
                             else {
                                 console.log('success')
@@ -422,11 +474,32 @@
                                     .then(re=>{
                                         if (re.data.status===1) {
                                             console.log('Wrong')
-                                            this.$router.push({path: '/ops'})
+                                            this.$router.push({path: '/user/ops'})
                                         }
                                         else {
                                             console.log('success')
                                             //jump
+                                            localStorage.setItem('file_id',re.data.file_id)
+                                            axios.post('/apis/user/applyEditFile',{
+                                                editFile:"editFile",
+                                                file_id:localStorage.getItem('file_id')
+                                            })
+                                                //then获取成功；response成功后的返回值（对象）
+                                                .then(response=>{
+                                                    console.log(response);
+                                                    this.tmp=response.data.file_text;
+                                                })
+                                                //获取失败
+                                                .catch(error=>{
+                                                    console.log(error);
+                                                    alert('网络错误，请稍后尝试');
+                                                })
+                                            localStorage.setItem('text',this.tmp)
+                                            axios.post('/apis/user/postModifiedFile',{
+                                                browseFile:'browseFile',
+                                                file_id:localStorage.getItem('file_id')
+                                            })
+                                            this.$router.push({path:'/user/edit'})
                                         }
                                     })
                             }
@@ -447,17 +520,38 @@
                                             .then(re=>{
                                                 if (re.data.status===1) {
                                                     console.log('Wrong')
-                                                    this.$router.push({path: '/ops'})
+                                                    this.$router.push({path: '/user/ops'})
                                                 }
                                                 else {
                                                     console.log('success')
                                                     //jump
+                                                    localStorage.setItem('file_id',re.data.file_id)
+                                                    axios.post('/apis/user/applyEditFile',{
+                                                        editFile:"editFile",
+                                                        file_id:localStorage.getItem('file_id')
+                                                    })
+                                                        //then获取成功；response成功后的返回值（对象）
+                                                        .then(response=>{
+                                                            console.log(response);
+                                                            this.tmp=response.data.file_text;
+                                                        })
+                                                        //获取失败
+                                                        .catch(error=>{
+                                                            console.log(error);
+                                                            alert('网络错误，请稍后尝试');
+                                                        })
+                                                    localStorage.setItem('text',this.tmp)
+                                                    axios.post('/apis/user/postModifiedFile',{
+                                                        browseFile:'browseFile',
+                                                        file_id:localStorage.getItem('file_id')
+                                                    })
+                                                    this.$router.push({path:'/user/edit'})
                                                 }
                                             })
                                     }
                                     else {
                                         console.log('Wrong')
-                                        this.$router.push({path: '/ops'})
+                                        this.$router.push({path: '/user/ops'})
                                     }
                                 })
                         }
@@ -481,7 +575,7 @@
         created(){
             axios.post('/apis/user/getstatus')
                 .then(res=>{
-                    if (res.status===0) {
+                    if (res.data.status===0) {
                         this.username=res.data.username
                         axios.post('/apis/user/my_favorite',{
                             my_favorite: "my_favorite"
@@ -506,7 +600,7 @@
                     }
                     else {
                         this.$router.push({
-                            path: "/login"
+                            path: "/user/yulog"
                         })
                         alert('请登录')
                     }

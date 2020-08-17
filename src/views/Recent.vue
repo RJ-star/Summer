@@ -187,7 +187,8 @@
                 temp:{
                     id:'',
                     address:''
-                }
+                },
+                tmp:''
             }
         },
         methods: {
@@ -198,7 +199,7 @@
                 this.$confirm('确认退出?', '提示', {})
                     .then(() => {
                         sessionStorage.removeItem('user');
-                        this.$router.push('/login');
+                        this.$router.push('/user/login');
                     })
                     .catch(() => { });
             },
@@ -218,17 +219,17 @@
             },
             gotoDesktop() {
                 this.$router.push({
-                    path: "/Desktop"
+                    path: "/user/Desktop"
                 });
             },
             gotoBin() {
                 this.$router.push({
-                    path: "/Bin"
+                    path: "/user/Bin"
                 });
             },
             gotoCreateDoc() {
                 this.$router.push({
-                    path: "/CreateDoc"
+                    path: "/user/CreateDoc"
                 });
             },
             // deleteHistory() {
@@ -272,7 +273,7 @@
                     if (response.data.status===0) {
                         if (response.data.read===0) {
                             console.log('Wrong')
-                            this.$router.push({path: '/ops'})
+                            this.$router.push({path: '/user/ops'})
                         }
                         else {
                             console.log('success')
@@ -283,11 +284,31 @@
                             .then(re=>{
                                 if (re.data.status===1) {
                                     console.log('Wrong')
-                                    this.$router.push({path: '/ops'})
+                                    this.$router.push({path: '/user/ops'})
                                 }
                                 else {
                                     console.log('success')
-                                    localStorage.setItem("searchParam", JSON.stringify(re.data));
+                                    localStorage.setItem('file_id',re.data.file_id);
+                                    axios.post('/apis/user/applyEditFile',{
+                                        editFile:"editFile",
+                                        file_id:localStorage.getItem('file_id')
+                                    })
+                                        //then获取成功；response成功后的返回值（对象）
+                                        .then(response=>{
+                                            console.log(response);
+                                            this.tmp=response.data.file_text;
+                                        })
+                                        //获取失败
+                                        .catch(error=>{
+                                            console.log(error);
+                                            alert('网络错误，请稍后尝试');
+                                        })
+                                    localStorage.setItem('text',this.tmp)
+                                    axios.post('/apis/user/postModifiedFile',{
+                                        browseFile:'browseFile',
+                                        file_id:localStorage.getItem('file_id')
+                                    })
+                                    this.$router.push({path:'/user/browser'})
                                 }
                             })
                         }
@@ -308,17 +329,37 @@
                                     .then(re=>{
                                         if (re.data.status===1) {
                                             console.log('Wrong')
-                                            this.$router.push({path: '/ops'})
+                                            this.$router.push({path: '/user/ops'})
                                         }
                                         else {
                                             console.log('success')
-                                            //jump
+                                            localStorage.setItem('file_id',re.data.file_id)
+                                            axios.post('/apis/user/applyEditFile',{
+                                                editFile:"editFile",
+                                                file_id:localStorage.getItem('file_id')
+                                            })
+                                                //then获取成功；response成功后的返回值（对象）
+                                                .then(response=>{
+                                                    console.log(response);
+                                                    this.tmp=response.data.file_text;
+                                                })
+                                                //获取失败
+                                                .catch(error=>{
+                                                    console.log(error);
+                                                    alert('网络错误，请稍后尝试');
+                                                })
+                                            localStorage.setItem('text',this.tmp)
+                                            axios.post('/apis/user/postModifiedFile',{
+                                                browseFile:'browseFile',
+                                                file_id:localStorage.getItem('file_id')
+                                            })
+                                            this.$router.push({path:'/user/browser'})
                                         }
                                     })
                             }
                             else {
                                 console.log('Wrong')
-                                this.$router.push({path: '/ops'})
+                                this.$router.push({path: '/user/ops'})
                             }
                         })
                     }
@@ -335,7 +376,7 @@
                         if (response.data.status===0) {
                             if (response.data.write===0) {
                                 console.log('Wrong')
-                                this.$router.push({path: '/ops'})
+                                this.$router.push({path: '/user/ops'})
                             }
                             else {
                                 console.log('success')
@@ -346,11 +387,31 @@
                                     .then(re=>{
                                         if (re.data.status===1) {
                                             console.log('Wrong')
-                                            this.$router.push({path: '/ops'})
+                                            this.$router.push({path: '/user/ops'})
                                         }
                                         else {
                                             console.log('success')
-                                            //jump
+                                            localStorage.setItem('file_id',re.data.file_id)
+                                            axios.post('/apis/user/applyEditFile',{
+                                                editFile:"editFile",
+                                                file_id:localStorage.getItem('file_id')
+                                            })
+                                                //then获取成功；response成功后的返回值（对象）
+                                                .then(response=>{
+                                                    console.log(response);
+                                                    this.tmp=response.data.file_text;
+                                                })
+                                                //获取失败
+                                                .catch(error=>{
+                                                    console.log(error);
+                                                    alert('网络错误，请稍后尝试');
+                                                })
+                                            localStorage.setItem('text',this.tmp)
+                                            axios.post('/apis/user/postModifiedFile',{
+                                                browseFile:'browseFile',
+                                                file_id:localStorage.getItem('file_id')
+                                            })
+                                            this.$router.push({path:'/user/edit'})
                                         }
                                     })
                             }
@@ -371,17 +432,38 @@
                                             .then(re=>{
                                                 if (re.data.status===1) {
                                                     console.log('Wrong')
-                                                    this.$router.push({path: '/ops'})
+                                                    this.$router.push({path: '/user/ops'})
                                                 }
                                                 else {
                                                     console.log('success')
                                                     //jump
+                                                    localStorage.setItem('file_id',re.data.file_id)
+                                                    axios.post('/apis/user/applyEditFile',{
+                                                        editFile:"editFile",
+                                                        file_id:localStorage.getItem('file_id')
+                                                    })
+                                                        //then获取成功；response成功后的返回值（对象）
+                                                        .then(response=>{
+                                                            console.log(response);
+                                                            this.tmp=response.data.file_text;
+                                                        })
+                                                        //获取失败
+                                                        .catch(error=>{
+                                                            console.log(error);
+                                                            alert('网络错误，请稍后尝试');
+                                                        })
+                                                    localStorage.setItem('text',this.tmp)
+                                                    axios.post('/apis/user/postModifiedFile',{
+                                                        browseFile:'browseFile',
+                                                        file_id:localStorage.getItem('file_id')
+                                                    })
+                                                    this.$router.push({path:'/user/edit'})
                                                 }
                                             })
                                     }
                                     else {
                                         console.log('Wrong')
-                                        this.$router.push({path: '/ops'})
+                                        this.$router.push({path: '/user/ops'})
                                     }
                                 })
                         }
@@ -401,12 +483,19 @@
                         .then(response=>{
                             console.log(response);
                             this.tableData.pop();
-                            let vlist = {{ response.data.fileNameSet|safe }} ;
-                            // for (let i=0, len=response.data.fileNameSet.length;i<len;i++) {
-                            //     this.temp.id=response.data.fileIdSet[i];
-                            //     this.temp.address=response.data.fileNameSet[i];
+                            // let list1=JSON.parse(response.data.fileIdSet);
+                            // let list2=JSON.parse(response.data.fileNameSet);
+                            // for (let i=0, len=list1.length;i<len;i++) {
+                            //     this.temp.id=list1[i];
+                            //     this.temp.address=list2[i];
                             //     this.tableData.push({id:this.temp.id,address:this.temp.address})
                             // }
+                            console.log(typeof response.data.namelist)
+                            for (let i=0, len=response.data.namelist.length;i<len;i++) {
+                                this.temp.id=response.data.fileIdList[i];
+                                this.temp.address=response.data.namelist[i];
+                                this.tableData.push({id:this.temp.id,address:this.temp.address})
+                            }
                         })
                         //获取失败
                         .catch(error=>{
@@ -416,7 +505,7 @@
                 }
                 else {
                     this.$router.push({
-                        path: "/login"
+                        path: "/user/login"
                     })
                     alert('请登录')
                 }

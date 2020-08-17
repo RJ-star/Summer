@@ -1,77 +1,75 @@
 <template>
     <div>
         <el-button type="primary" round @click="save">保存</el-button>
+        <el-button type="info" round @click="back">返回</el-button>
+        <br><br>
+        <el-input v-model="title" placeholder="请输入标题"></el-input>
+        <br><br>
+        <div id="editor" disabled="false"></div>
     </div>
 
 </template>
 <script>
+
+    // import { quillEditor } from 'vue-quill-editor'
     // import axios from 'axios'
+    // // 1、使用qs将axios发送的数据格式转换为form-data格式（在安装axios时，默认就安装了）
     // import qs from 'qs'
-    export default{
-        data(){
+    // import E from 'wangeditor'
+    import Editor from 'wangeditor'
+    import 'wangeditor/release/wangEditor.min.css'
+    import axios from 'axios'
+    export default {
+        name: 'editor',
+        data () {
             return {
-                content:'',
-                table:[{
-                    id:'',
-                    name:''
-                }],
-                // table2:[{
-                //     id:'1111',
-                //     name:'11'
-                // },{
-                //     id:'1112',
-                //     name:'12'
-                // }]
-                temp:{
-                    id:null,
-                    name:null
-                },
-                table1:['1','2','3'],
-                table2:['a','b','c']
+                editorContent: '',//定义为全局变量
+                editor:'<p style="text-align: left;">用 777 设置的内容</p>',    //定义为全局变量
+                title:'',
+                temp:'11qqq1'
             }
-
         },
-        methods:{
-            save: function() {
-                // this.table.push({id: '111',name:'aaa'})
-                // this.table.push({id: '112',name:'aaa'})
-                // this.table.push({id: '113',name:'aaa'})
-                // this.table.push({id: '114',name:'aaa'})
-
-                // this.table2.forEach(item=>{
-                //     this.table.push(item)
-                //
-                // })
-                this.table.pop()
-                for (var i = 0, len = this.table1.length; i < len; i++) {
-                    this.temp.id=this.table1[i];
-                    this.temp.name=this.table2[i];
-                     this.table.push({id:this.temp.id,name:this.temp.name});
-                    console.log(this.temp.id+'tse');
-                }
-                console.log('------------------------')
-                for (i=0;i<len;i++) {
-                    console.log(this.table[i].id+'ttt')
-                }
-                // for (var j=0, l=this.table.length; j<l;j++) {
-                //     console.log(this.table.id+'test')
-                // }
-                // this.table.forEach(item=>{
-                //     console.log(item.id)
-                // })
-                // console.log(this.content)
-                // axios.post(
-                //     "apis/user/test",
-                //     {content: this.content}
-                // )
-                //     .then(response => {F
-                //         console.log(response)
-                //     }
-                //     )
-
+        methods: {
+            getContent: function () {
+                this.editor.txt.html('')  //清空富文本框
+                alert(this.editorContent)
+                this.editor.txt.html("“内容”"); //富文本框设置内容
+            },
+            save() {
+                console.log(this.title)
+                console.log(this.editor.txt.html())
+                axios.post('/apis/user/createDoc',{
+                    upload:"upload",
+                    content:this.editor.txt.html(),
+                    file_name:this.title
+                })
+                .then(response=>{
+                    if (response.data.status===0) {
+                        alert('上传成功')
+                    }
+                    else
+                        alert('上传失败，请稍后再试')
+                })
+            },
+            back:function() {
+                this.$router.go(-1)
             },
         },
+        mounted() {
+            this.editor='<p style="text-align: left;">用 777 设置的内容</p>'
+            this.editor = new Editor("#editor");
+            this.editor.create();
+            this.editor.txt.html(this.temp)
+            console.log(this.editor)
+            this.title='111'
+            localStorage.setItem('number',112)
+            console.log(localStorage.getItem('number'))
+            localStorage.setItem('number',113)
+            console.log(localStorage.getItem('number'))
+        }
     }
+
 </script>
 <style>
+
 </style>

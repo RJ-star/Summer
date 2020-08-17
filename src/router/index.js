@@ -29,11 +29,11 @@ Vue.use(VueRouter)
     name: 'Ops',
     component: () => import(/* webpackChunkName: "about" */ '../views/ops.vue')
   },
-  {
-    path: '/Container',
-    name: 'Container',
-    component: () => import(/* webpackChunkName: "about" */ '../views/Container.vue')
-  },
+  // {
+  //   path: '/Container',
+  //   name: 'Container',
+  //   component: () => import(/* webpackChunkName: "about" */ '../views/Container.vue')
+  // },
   {
     path: '/Register',
     name: 'Register',
@@ -83,6 +83,31 @@ Vue.use(VueRouter)
       path: '/Patterns',
       name: 'Patterns',
       component: () => import(/* webpackChunkName: "about" */ '../views/Patterns.vue')
+    },
+    {
+      path: '/Detail',
+      name: 'Detail',
+      component: () => import(/* webpackChunkName: "about" */ '../views/Detail.vue')
+    },
+    {
+      path: '/test',
+      name: 'test',
+      component: () => import(/* webpackChunkName: "about" */ '../views/test.vue')
+    },
+    {
+      path: '/Favorite',
+      name: 'Favorite',
+      component: () => import(/* webpackChunkName: "about" */ '../views/Favorite.vue')
+    },
+    {
+      path: '/browser',
+      name: 'browser',
+      component: () => import(/* webpackChunkName: "about" */ '../views/browser.vue')
+    },
+    {
+      path: '/edit',
+      name: 'editr',
+      component: () => import(/* webpackChunkName: "about" */ '../views/edit.vue')
     },
 ]
 
