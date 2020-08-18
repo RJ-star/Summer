@@ -137,6 +137,7 @@
         },
         mounted() {
             this.editor = new Editor("#editor");
+            this.editor.customConfig.uploadImgShowBase64 = true
             this.editor.create()
         }
     }

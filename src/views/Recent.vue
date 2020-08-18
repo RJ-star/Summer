@@ -82,10 +82,12 @@
                             <el-menu-item v-for="(item,i) in navList" :key="i" :index="item.name">
                                 {{ item.navItem }}
                             </el-menu-item>
+                        <el-input v-model="searchDoc" placeholder="请输入文档ID" style="width:180px;"></el-input>
+
+                        <el-button plain type="primary" @click="browser_search">查看</el-button>
+                        <el-button plain type="primary" @click="edit_search">编辑</el-button>
 <!--                        <el-menu-item index="1">最近文件</el-menu-item>-->
 <!--                        <el-menu-item index="2" @click="gotoUser">我创建的文件</el-menu-item>-->
-
-
 
                     </el-menu>
 
@@ -111,6 +113,7 @@
                 </el-header>
 
                 <el-main class="app-body">
+
                     <el-table
 
                             :data="tableData"
@@ -133,17 +136,52 @@
                         <el-table-column
                                 fixed="right"
                                 label="操作"
-                                width="150">
+                                width="180">
                             <template slot-scope="scope">
                                 <el-button type="text" size="small" @click="browserDoc(scope.$index, scope.row)">查看</el-button>
                                 <el-button type="text" size="small" @click="editDoc(scope.$index, scope.row)">编辑</el-button>
                                 <el-button type="text" size="small" @click="favorite(scope.$index, scope.row)">收藏</el-button>
+                                <el-button type="text" size="small" @click="remark(scope.$index, scope.row)">评论</el-button>
 <!--                                <el-button type="text" size="small" @click="deleteHistory">删除记录</el-button>-->
-
+<!--                                <el-badge :value=gridData.length class="item">-->
+<!--                                    <el-button size="small" @click="dialogTableVisible = true">评论</el-button>-->
+<!--                                    <el-dialog style="text-align: left;" title="全部评论" :visible.sync="dialogTableVisible">-->
+<!--                                        <el-table :data="gridData">-->
+<!--                                            <el-table-column property="date" label="日期" width="150"></el-table-column>-->
+<!--                                            <el-table-column property="name" label="昵称" width="200"></el-table-column>-->
+<!--                                            <el-table-column property="comment" label="内容"></el-table-column>-->
+<!--                                        </el-table>-->
+<!--                                        &nbsp;<br>-->
+<!--                                        <el-form :inline="true" :model="formInline" class="demo-form-inline">-->
+<!--                                            <el-form-item label="发表评论" :label-width="formLabelWidth">-->
+<!--                                                <el-input v-model="formcomment.comment" autocomplete="off"></el-input>-->
+<!--                                            </el-form-item>-->
+<!--                                            <el-form-item>-->
+<!--                                                <el-button type="primary" @click="onSubmit">发表</el-button>-->
+<!--                                            </el-form-item>-->
+<!--                                        </el-form>-->
+<!--                                    </el-dialog>-->
+<!--                                </el-badge>-->
                             </template>
                         </el-table-column>
-                    </el-table>
 
+                    </el-table>
+<!--                    <el-dialog style="text-align: left;" title="全部评论" :visible.sync="dialogTableVisible">-->
+<!--                        <el-table :data="gridData">-->
+<!--                            <el-table-column property="date" label="日期" width="150"></el-table-column>-->
+<!--                            <el-table-column property="name" label="昵称" width="200"></el-table-column>-->
+<!--                            <el-table-column property="comment" label="内容"></el-table-column>-->
+<!--                        </el-table>-->
+<!--                        &nbsp;<br>-->
+<!--                        <el-form :inline="true" :model="formInline" class="demo-form-inline">-->
+<!--                            <el-form-item label="发表评论" :label-width="formLabelWidth">-->
+<!--                                <el-input v-model="formcomment.comment" autocomplete="off"></el-input>-->
+<!--                            </el-form-item>-->
+<!--                            <el-form-item>-->
+<!--                                <el-button type="primary" @click="onSubmit">发表</el-button>-->
+<!--                            </el-form-item>-->
+<!--                        </el-form>-->
+<!--                    </el-dialog>-->
                     <template>
                         <router-view/>
                     </template>
@@ -160,6 +198,7 @@
         data() {
             return {
                 username: '',
+                searchDoc:'',
                 isCollapse: false,
                 circleUrl: "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
                 tableData: [{
@@ -249,6 +288,243 @@
             //         // }
             //     })
             // },
+            browser_search() {
+                console.log(this.searchDoc)
+                axios.post('/apis/user/checkSpecificAuthority',{
+                    checkSpecificAuthority:"checkSpecificAuthority",
+                    file_id:this.searchDoc
+                })
+                    .then(response=>{
+                        if (response.data.status===0) {
+                            if (response.data.read===0) {
+                                console.log('Wrong')
+                                this.$router.push({path: '/user/ops'})
+                            }
+                            else {
+                                console.log('success')
+                                axios.post('/apis/user/fileEditStatus',{
+                                    freeFile: "freeOrNot",
+                                    file_id:this.searchDoc
+                                })
+                                    .then(re=>{
+                                        if (re.data.status===1) {
+                                            console.log('Wrong')
+                                            this.$router.push({path: '/user/ops'})
+                                        }
+                                        else {
+                                            console.log('success')
+                                            localStorage.setItem('file_id',re.data.file_id);
+                                            axios.post('/apis/user/applyEditFile',{
+                                                editFile:"editFile",
+                                                file_id:localStorage.getItem('file_id')
+                                            })
+                                                //then获取成功；response成功后的返回值（对象）
+                                                .then(response=>{
+                                                    console.log(response);
+                                                    this.tmp=response.data.file_text;
+                                                })
+                                                //获取失败
+                                                .catch(error=>{
+                                                    console.log(error);
+                                                    alert('网络错误，请稍后尝试');
+                                                })
+                                            localStorage.setItem('text',this.tmp)
+                                            axios.post('/apis/user/postModifiedFile',{
+                                                browseFile:'browseFile',
+                                                file_id:localStorage.getItem('file_id')
+                                            })
+                                            this.$router.push({path:'/user/browser'})
+                                        }
+                                    })
+                            }
+                        }
+
+                        if (response.data.status===1) {//验证通用权限
+                            axios.post('/apis/user/checkGeneralAuthority',{
+                                checkGerneralAuthority:"checkGerneralAuthority",
+                                file_id:this.searchDoc
+                            })
+                                .then(res=>{
+                                    if (res.data.status===0) {
+                                        console.log('success')
+                                        axios.post('/apis/user/fileEditStatus',{
+                                            freeFile: "freeOrNot",
+                                            file_id:this.searchDoc
+                                        })
+                                            .then(re=>{
+                                                if (re.data.status===1) {
+                                                    console.log('Wrong')
+                                                    this.$router.push({path: '/user/ops'})
+                                                }
+                                                else {
+                                                    console.log('success')
+                                                    localStorage.setItem('file_id',re.data.file_id)
+                                                    axios.post('/apis/user/applyEditFile',{
+                                                        editFile:"editFile",
+                                                        file_id:localStorage.getItem('file_id')
+                                                    })
+                                                        //then获取成功；response成功后的返回值（对象）
+                                                        .then(response=>{
+                                                            console.log(response);
+                                                            this.tmp=response.data.file_text;
+                                                        })
+                                                        //获取失败
+                                                        .catch(error=>{
+                                                            console.log(error);
+                                                            alert('网络错误，请稍后尝试');
+                                                        })
+                                                    localStorage.setItem('text',this.tmp)
+                                                    axios.post('/apis/user/postModifiedFile',{
+                                                        browseFile:'browseFile',
+                                                        file_id:localStorage.getItem('file_id')
+                                                    })
+                                                    this.$router.push({path:'/user/browser'})
+                                                }
+                                            })
+                                    }
+                                    else {
+                                        console.log('Wrong')
+                                        this.$router.push({path: '/user/ops'})
+                                    }
+                                })
+                        }
+
+                    })
+            },
+            edit_search() {
+                console.log(this.searchDoc)
+                axios.post('/apis/user/checkSpecificAuthority',{
+                    checkSpecificAuthority:"checkSpecificAuthority",
+                    file_id:this.searchDoc
+                })
+                    .then(response=>{
+                        if (response.data.status===0) {
+                            if (response.data.write===0) {
+                                console.log('Wrong')
+                                this.$router.push({path: '/user/ops'})
+                            }
+                            else {
+                                console.log('success')
+                                axios.post('/apis/user/fileEditStatus',{
+                                    freeFile: "freeOrNot",
+                                    file_id:this.searchDoc
+                                })
+                                    .then(re=>{
+                                        if (re.data.status===1) {
+                                            console.log('Wrong')
+                                            this.$router.push({path: '/user/ops'})
+                                        }
+                                        else {
+                                            console.log('success')
+                                            localStorage.setItem('file_id',re.data.file_id)
+                                            axios.post('/apis/user/applyEditFile',{
+                                                editFile:"editFile",
+                                                file_id:localStorage.getItem('file_id')
+                                            })
+                                                //then获取成功；response成功后的返回值（对象）
+                                                .then(response=>{
+                                                    console.log(response);
+                                                    this.tmp=response.data.file_text;
+                                                })
+                                                //获取失败
+                                                .catch(error=>{
+                                                    console.log(error);
+                                                    alert('网络错误，请稍后尝试');
+                                                })
+                                            localStorage.setItem('text',this.tmp)
+                                            axios.post('/apis/user/postModifiedFile',{
+                                                browseFile:'browseFile',
+                                                file_id:localStorage.getItem('file_id')
+                                            })
+                                            this.$router.push({path:'/user/edit'})
+                                        }
+                                    })
+                            }
+                        }
+
+                        if (response.data.status===1) {//验证通用权限
+                            axios.post('/apis/user/checkGeneralAuthority',{
+                                checkGerneralAuthority:"checkGerneralAuthority",
+                                file_id:this.searchDoc
+                            })
+                                .then(res=>{
+                                    if (res.data.status===0) {
+                                        console.log('success')
+                                        axios.post('/apis/user/fileEditStatus',{
+                                            freeFile: "freeOrNot",
+                                            file_id:this.searchDoc
+                                        })
+                                            .then(re=>{
+                                                if (re.data.status===1) {
+                                                    console.log('Wrong')
+                                                    this.$router.push({path: '/user/ops'})
+                                                }
+                                                else {
+                                                    console.log('success')
+                                                    //jump
+                                                    localStorage.setItem('file_id',re.data.file_id)
+                                                    axios.post('/apis/user/applyEditFile',{
+                                                        editFile:"editFile",
+                                                        file_id:localStorage.getItem('file_id')
+                                                    })
+                                                        //then获取成功；response成功后的返回值（对象）
+                                                        .then(response=>{
+                                                            console.log(response);
+                                                            this.tmp=response.data.file_text;
+                                                        })
+                                                        //获取失败
+                                                        .catch(error=>{
+                                                            console.log(error);
+                                                            alert('网络错误，请稍后尝试');
+                                                        })
+                                                    localStorage.setItem('text',this.tmp)
+                                                    axios.post('/apis/user/postModifiedFile',{
+                                                        browseFile:'browseFile',
+                                                        file_id:localStorage.getItem('file_id')
+                                                    })
+                                                    this.$router.push({path:'/user/edit'})
+                                                }
+                                            })
+                                    }
+                                    else {
+                                        console.log('Wrong')
+                                        this.$router.push({path: '/user/ops'})
+                                    }
+                                })
+                        }
+
+                    })
+            },
+            remark(index,row) {
+                console.log(index,row.id)
+                axios.post('/apis/user/checkSpecificAuthority',{
+                    checkSpecificAuthority:"checkSpecificAuthority",
+                    file_id:row.id
+                })
+                .then(response=>{
+                    if (response.data.review===1){
+                        localStorage.setItem('remark_file_id',response.data.file_id)
+                        this.$router.push({path:'/user/remark'})
+                    }
+                    else{
+                        axios.post('/apis/user/checkGeneralAuthority',{
+                            checkGerneralAuthority:"checkGerneralAuthority",
+                            file_id:row.id
+                        })
+                        .then(res=>{
+                            if (res.data.review===1){
+                                localStorage.setItem('remark_file_id',res.data.file_id)
+                                this.$router.push({path:'/user/remark'})
+                            }
+                            else {
+                                console.log('Wrong')
+                                this.$router.push({path: '/user/ops'})
+                            }
+                        })
+
+                    }
+                })
+            },
             favorite(index,row){
                 console.log(row.id);
                 axios.post('/apis/user/add_favorite',{

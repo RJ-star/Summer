@@ -122,6 +122,7 @@
             console.log(this.temp)
             // this.temp=localStorage.getItem('text');
             this.editor = new Editor("#editor");
+            this.editor.customConfig.uploadImgShowBase64 = true
             this.editor.create();
             // this.editor.txt.html(this.temp);
             this.editor.$textElem.attr('contenteditable', false)
