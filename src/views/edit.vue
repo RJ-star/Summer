@@ -167,6 +167,7 @@
                 })
             // this.temp=localStorage.setItem('text');
             this.editor = new Editor("#editor");
+            this.editor.customConfig.uploadImgShowBase64 = true
             this.editor.create();
             // this.editor.txt.html(this.temp);
             // console.log(this.temp)

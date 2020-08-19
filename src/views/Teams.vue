@@ -1,7 +1,7 @@
 <template>
     <div class="app">
         <el-container>
-            <el-aside class="app-side app-side-left"
+			<el-aside class="app-side app-side-left"
                       :class="isCollapse ? 'app-side-collapsed' : 'app-side-expanded'">
                 <el-dropdown
                         trigger="hover"
@@ -30,14 +30,14 @@
                         <el-button round @click="gotoCreateDoc">新建文档</el-button>
                         <br>
                         <br>
-                        <el-button type="primary" round @click="gotoPatterns" disabled>使用模板</el-button>
+                        <el-button type="primary" round @click="gotoPatterns">使用模板</el-button>
                         <br>
                         <br>
                         <el-menu-item index="1" @click="gotoRecent">
                             <i class="el-icon-s-platform"></i>
                             <span slot="title">工作台</span>
                         </el-menu-item>
-                        <el-menu-item index="2" @click="gotoTeams">
+                        <el-menu-item index="2" @click="gotoTeams" disabled>
                             <i class="el-icon-s-promotion"></i>
                             <span slot="title">团队空间</span>
                         </el-menu-item>
@@ -56,7 +56,7 @@
 							mode="horizontal"
 							@select="handleSelect"
 							active-text-color="#409EFF">
-						<el-menu-item index="1">模板库</el-menu-item>
+						<el-menu-item index="1">团队空间列表</el-menu-item>
 					</el-menu>
 				</el-header>
 				<template>
@@ -66,19 +66,37 @@
 							style="width: 100%">
 							<el-table-column
 								prop="name"
-								label="文档名">
+								label="团队名">
 							</el-table-column>
 							<el-table-column
 								fixed="right"
 								label="操作"
 								width="150">
 								<template slot-scope="scope">
-									<el-button type="text" size="small" @click="detail(scope.$index, scope.row)">查看</el-button>
+									<el-button type="text" size="small" @click="toTeam(scope.$index, scope.row)">前往团队空间</el-button>
 								</template>
 							</el-table-column>
 						</el-table>
+						<div style="text-align: center;margin-top: 20px;">
+							<el-button round @click="dialogFormVisible = true">创建团队</el-button>
+							<el-dialog title="创建团队" :visible.sync="dialogFormVisible">
+								<el-form :model="formTeam" ref="formTeam">
+									<el-form-item label="团队名称" :label-width="formLabelWidth">
+									<el-col :span="22"><el-input v-model="formTeam.teamname" autocomplete="off"></el-input></el-col>
+									</el-form-item>
+									<el-form-item label="团队介绍" :label-width="formLabelWidth">
+										<el-col :span="22"><el-input type="textarea" v-model="formTeam.desc"></el-input></el-col>
+									</el-form-item>
+								</el-form>
+								<div slot="footer" class="dialog-footer">
+									<el-button @click="dialogFormVisible = false">取 消</el-button>
+									<el-button type="primary" @click="createTeam('formTeam')">确 定</el-button>
+								</div>
+							</el-dialog>
+						</div>
 						<router-view/>
 					</el-main>
+					
 				</template>
 			</el-container>
 		</el-container>
@@ -87,26 +105,77 @@
 
 <script>
     export default {
-        name: 'Patterns',
+        name: 'Teams',
         data() {
             return {
 				currentDate: new Date(),
                 username: '',
                 isCollapse: false,
+				formTeam:{
+					teamname : '',
+					desc : ''
+				},
+				dialogFormVisible:false,
                 circleUrl: "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
                 items: [{
 					id: '',
-					name: '',
-					text: ''
+					name: ''
 				}],
 				temp: [{
 					id: '',
-					name: '',
-					text: ''
+					name: ''
 				}]
             }
         },
         methods: {
+			createTeam: function(formdata){
+				// this.$axios.post('/apis/user/getstatus')
+				// .then(res=>{
+				// 	if (res.data.status===0) {
+						this.$refs[formdata].validate((valid) => { 
+							if (valid) {
+								const h = this.$createElement;
+								if(this.formTeam.teamname==''){
+									this.$notify({
+										title: '团队名不能为空！',
+										message: h('i', { style: 'color: teal'}, '请再次输入'),
+										type: 'warning'
+									});
+								}
+								else{
+									this.$notify({
+										title: '团队创建成功！',
+										message: h('i', { style: 'color: teal'}, '请再次输入'),
+										type: 'success'
+									});
+									this.$axios.post('/apis/user/create_team', {
+										create : "create",
+										team_name : this.formTeam.teamname,
+										team_description : this.formTeam.desc
+									})
+									.then(response => {
+										if (response.data.status === 0) {
+										window.location.reload()
+										// this.$router.go(0)
+										} else {
+										return false
+										}
+									})
+								}
+							}	
+							else {
+								return false;
+							}
+						})
+					// }
+					// else{
+					// 	this.$router.push({
+					// 		path: "/login"
+					// 	})
+					// 		alert('请登录')
+					// }
+					// })
+			},
             toggleSideBar() {
                 this.isCollapse = !this.isCollapse
             },
@@ -127,6 +196,11 @@
             handleSelect(key, keyPath) {
                 console.log(key, keyPath);
             },
+			toTeam(index, row){
+				console.log(row.id)
+				localStorage.setItem('team_id',row.id);
+				this.$router.push({path:'/user/teaminfo'})
+			},
 			gotoUser() {
                 this.$router.push({
                     path: "/user/User"
@@ -167,12 +241,6 @@
                     path: "/user/Teams"
                 });
             },
-			detail(index, row){
-				localStorage.clear();
-				localStorage.setItem('text',row.text);
-				localStorage.setItem('name',row.name);
-				this.$router.push({path:'/user/detail'})
-			}
 		},
 		mounted: function () {
 			let user = sessionStorage.getItem('user');
@@ -182,15 +250,14 @@
 			this.$axios.post('/apis/user/getstatus')
 			.then(res=>{
 				if (res.data.status===0) {
-					this.$axios.post('/apis/user/showTemplates',{showtemplates : "showtemplates"})
+					this.$axios.post('/apis/user/myTeam',{myteam : "myteam"})
 						.then(response =>{
 						console.log(response);
-								this.items.pop();
-							for (let i=0, len=response.data.retTemplatesId.length;i<len;i++) {
-								this.temp.id=response.data.retTemplatesId[i],
-								this.temp.name=response.data.retTemplatesName[i],
-								this.temp.text=response.data.retTemplatesText[i],
-								this.items.push({id:this.temp.id,name:this.temp.name,text:this.temp.text})
+							this.items.pop();
+							for (let i=0, len=response.data.retTeamIdlist.length;i<len;i++) {
+								this.temp.id=response.data.retTeamIdlist[i],
+								this.temp.name=response.data. retTeamNamelist[i],
+								this.items.push({id:this.temp.id,name:this.temp.name})
 							}
 						})
 					.catch(error=>{

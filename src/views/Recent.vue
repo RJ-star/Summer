@@ -15,8 +15,8 @@
                                     <!--                <i class="el-icon-arrow-down el-icon&#45;&#45;right"></i>-->
                                 </span>
                     <el-dropdown-menu slot="dropdown">
-                        <el-dropdown-item>我的消息</el-dropdown-item>
-                        <el-dropdown-item>设置</el-dropdown-item>
+                        <el-dropdown-item @click.native="gotoMail">我的消息</el-dropdown-item>
+                        <el-dropdown-item @click.native="gotoUserprofile">设置</el-dropdown-item>
                         <el-dropdown-item divided
                                           @click.native="logout">退出登录</el-dropdown-item>
                     </el-dropdown-menu>
@@ -51,17 +51,17 @@
                         <!--                            </el-submenu>-->
                         <!--                        </el-submenu>-->
                         <el-button round @click="gotoCreateDoc">新建文档</el-button>
-                        <el-button type="primary" round>使用模板</el-button>
-                        <el-menu-item index="1">
+                        <el-button type="primary" round @click="gotoDetail">使用模板</el-button>
+                        <el-menu-item index="1" disabled>
                             <i class="el-icon-s-platform"></i>
                             <span slot="title">工作台</span>
                         </el-menu-item>
-                        <el-menu-item index="2" @click="gotoDesktop">
+                        <!-- <el-menu-item index="2" @click="gotoDesktop">
                             <i class="el-icon-menu"></i>
                             <span slot="title">我的桌面</span>
-                        </el-menu-item>
-                        <el-menu-item index="3">
-                            <i class="el-icon-document"></i>
+                        </el-menu-item> -->
+                        <el-menu-item index="3" @click="gotoTeams">
+                            <i class="el-icon-document" ></i>
                             <span slot="title">团队空间</span>
                         </el-menu-item>
                         <el-menu-item index="4" @click="gotoBin">
@@ -219,9 +219,9 @@
             //         id:'777'
             // }
                 navList:[
-                    {name:'/Recent',navItem:'最近文件'},
-                    {name:'/User',navItem:'我创建的文件'},
-                    {name:'/Favorite',navItem:'我的收藏'}
+                    {name:'/user/Recent',navItem:'最近文件'},
+                    {name:'/user/User',navItem:'我创建的文件'},
+                    {name:'/user/Favorite',navItem:'我的收藏'}
                 ],
                 temp:{
                     id:'',
@@ -253,13 +253,23 @@
             },
             gotoUser() {
                 this.$router.push({
-                    path: "/User"
+                    path: "/user/User"
                 });
             },
             gotoDesktop() {
                 this.$router.push({
                     path: "/user/Desktop"
                 });
+            },
+            gotoMail:function() {
+                this.$router.push({
+                    path: "/user/Mail"
+                });
+            },
+            gotoUserprofile:function()
+            {this.$router.push({
+                    path:"/user/Userprofile"
+                })
             },
             gotoBin() {
                 this.$router.push({
@@ -269,6 +279,16 @@
             gotoCreateDoc() {
                 this.$router.push({
                     path: "/user/CreateDoc"
+                });
+            },
+            gotoTeams() {
+                this.$router.push({
+                    path: "/user/teams"
+                });
+            },
+            gotoDetail() {
+                this.$router.push({
+                    path: "/user/patterns"
                 });
             },
             // deleteHistory() {

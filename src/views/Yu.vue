@@ -112,7 +112,7 @@
                         })
                         .then(response => {
                             if (response.data.status === 0) {
-                                this.$router.push({path: '/Recent'})
+                                this.$router.push({path: '/user/Recent'})
                                 window.location.reload()
                             } else {
                                 return false

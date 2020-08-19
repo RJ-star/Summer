@@ -11,24 +11,43 @@
                  show-icon>
          </el-alert>
          <br>
-         <el-button type="primary" round @click="intoTeam">进入该团队首页</el-button>
-         <br>
-         <br>
-         <img src="../assets/team.jpeg" alt="">
+         <el-button type="primary" round @click="intoTeam">进入我的团队进行查看</el-button>
      </div>
 </template>
 
 <script>
     export default {
         name: "Congratulations",
+        data(){
+            return{
+                //userID:'',
+                teamID:'',
+                teamname:''
+            }
+        },
         methods: {
             goBack() {
                 this.$router.go(-1);
                 console.log('go back');
             },
             intoTeam(){
-                console.log('into team');
+                this.$router.push({
+                    path: "/user/Teams"
+                });
+            },
+            initialization:function () {
+                this.teamID=this.$route.query.teamID;
             }
+        },
+        mounted: function () {
+            let user = sessionStorage.getItem('user');
+            if (user) {
+                this.username = user;
+            }
+
+        },
+        created(){
+            this.initialization();
         }
     }
 </script>

@@ -11,7 +11,7 @@
         <br>
         <el-button round @click="back">返回</el-button>
         <br>
-        <img src="../assets/background.png" alt="">
+        <img src="../../assets/background.png" alt="">
     </div>
 
 </template>

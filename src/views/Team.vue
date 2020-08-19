@@ -35,17 +35,17 @@
                             <i class="el-icon-menu"></i>
                             <span slot="title">我的桌面</span>
                         </el-menu-item>
-                        <el-submenu index="3">					//有改动
+                        <el-submenu index="3">
                             <span slot="title"><i class="el-icon-document"></i>团队空间</span>
 							<el-menu-item-group>
-								<el-button round @click="dialogFormVisible = true">创建团队</el-button>			//1开始
+								<el-button round @click="dialogFormVisible = true">创建团队</el-button>
 								<el-dialog title="创建团队" :visible.sync="dialogFormVisible">
 									<el-form :model="formTeam" ref="formTeam" rules="rules">
 										<el-form-item label="团队名称" :label-width="formLabelWidth">
-										<el-col :span="22"><el-input v-model="formTeam.teamname" autocomplete="off"></el-input></el-col>
+										<el-input v-model="formTeam.teamname" autocomplete="off"></el-input>
 										</el-form-item>
 										<el-form-item label="团队介绍" :label-width="formLabelWidth">
-											<el-col :span="22"><el-input type="textarea" v-model="formTeam.desc"></el-input></el-col>
+											<el-input type="textarea" v-model="formTeam.desc"></el-input>
 										</el-form-item>
 									</el-form>
 									<div slot="footer" class="dialog-footer">
@@ -55,8 +55,8 @@
 								</el-dialog>
 								<el-menu-item index="3-1">团队1</el-menu-item>
 								<el-menu-item index="3-2">团队2</el-menu-item>
-							</el-menu-item-group>								//1结束
-                        </el-submenu>				//有改动
+							</el-menu-item-group>
+                        </el-submenu>
                         <el-menu-item index="4" @click="gotoBin">
                             <i class="el-icon-delete"></i>
                             <span slot="title">回收站</span>
@@ -154,16 +154,16 @@
                     {name:'/Recent',navItem:'最近文件'},
                     {name:'/User',navItem:'我创建的文件'},
                 ],
-				formTeam:{			//2开始
+				formTeam:{
 					teamname : '',
 					desc : ''
 				},
 				dialogFormVisible: false,
-				formLabelWidth: '120px' 			//2结束
+				formLabelWidth: '120px'
             }
         },
         methods: {
-			createTeam: function(formdata){				//3开始
+			createTeam: function(formdata){
 				// this.$axios.post('/apis/user/getstatus')
 				// .then(res=>{
 				// 	if (res.data.status===0) {
@@ -184,7 +184,7 @@
 										type: 'success'
 									});
 									this.$axios.post('/apis/user/create_team', {
-										create : "create",
+                                        create : "create",
 										team_name : this.formTeam.teamname,
 										team_description : this.formTeam.desc
 									})
@@ -209,7 +209,7 @@
 					// 		alert('请登录')
 					// }
 					// })
-			},					//3结束
+			},
             toggleSideBar() {
                 this.isCollapse = !this.isCollapse
             },
@@ -217,7 +217,7 @@
                 this.$confirm('确认退出?', '提示', {})
                     .then(() => {
                         sessionStorage.removeItem('user');
-                        this.$router.push('/login');
+                        this.$router.push('/user/login');
                     })
                     .catch(() => { });
             },

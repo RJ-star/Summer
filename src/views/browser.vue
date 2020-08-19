@@ -10,31 +10,31 @@
                 show-icon>
         </el-alert>
         <br>
-        <!--        <el-button type="primary" round @click="save">保存</el-button>-->
+<!--        <el-button type="primary" round @click="save">保存</el-button>-->
         <el-button type="info" round @click="back">返回</el-button>
         <br><br>
         <el-input v-model="title" :disabled="true" placeholder="请输入标题"></el-input>
         <br><br>
-        <!--        <el-input v-model="docData.file_name" placeholder="请输入标题"></el-input>-->
-        <!--        <br><br>-->
-        <!--        <quill-editor-->
-        <!--                v-model="docData.content"-->
-        <!--                ref="myQuillEditor"-->
-        <!--                :options="editorOption"-->
-        <!--                @blur="onEditorBlur($event)" @focus="onEditorFocus($event)"-->
-        <!--                @change="onEditorChange($event)"-->
+<!--        <el-input v-model="docData.file_name" placeholder="请输入标题"></el-input>-->
+<!--        <br><br>-->
+<!--        <quill-editor-->
+<!--                v-model="docData.content"-->
+<!--                ref="myQuillEditor"-->
+<!--                :options="editorOption"-->
+<!--                @blur="onEditorBlur($event)" @focus="onEditorFocus($event)"-->
+<!--                @change="onEditorChange($event)"-->
 
-        <!--                class="quill-editor">-->
-        <!--        </quill-editor>-->
-        <!--        <div v-html="str" class="ql-editor">-->
-        <!--            {{str}}-->
-        <!--        </div>-->
-        <!--        <div class="ql-container ql-snow">-->
-        <!--            <div class="ql-editor">-->
-        <!--                {{this.str}}-->
-        <!--            </div>-->
-        <!--        </div>-->
-        <div id="editor"></div>
+<!--                class="quill-editor">-->
+<!--        </quill-editor>-->
+<!--        <div v-html="str" class="ql-editor">-->
+<!--            {{str}}-->
+<!--        </div>-->
+<!--        <div class="ql-container ql-snow">-->
+<!--            <div class="ql-editor">-->
+<!--                {{this.str}}-->
+<!--            </div>-->
+<!--        </div>-->
+            <div id="editor"></div>
     </div>
 
 </template>
@@ -102,23 +102,25 @@
         //         })
         // },
         mounted() {
-            axios.post('/apis/user/applyEditFile',{
-                editFile:"editFile",
-                file_id:localStorage.getItem('file_id')
-            })
-                //then获取成功；response成功后的返回值（对象）
-                .then(response=>{
-                    console.log(response);
-                    this.title=response.data.file_name;
-                    this.editorContent=response.data.file_text.toString();
-                    console.log(response.data.file_text.toString())
-                    this.editor.txt.html(response.data.file_text.toString());
-                })
-                //获取失败
-                .catch(error=>{
-                    console.log(error);
-                    alert('网络错误，请稍后尝试');
-                })
+                axios.post('/apis/user/applyEditFile',{
+                            editFile:"editFile",
+                            file_id:localStorage.getItem('file_id')
+                        })
+                            //then获取成功；response成功后的返回值（对象）
+                            .then(response=>{
+                                console.log(response);
+                                this.title=response.data.file_name;
+                                this.editorContent=response.data.file_text.toString();
+                                console.log(response.data.file_text.toString())
+                                // this.temp=response.data.file_text.toString();
+                                // this.temp = "1234"
+                                this.editor.txt.html(response.data.file_text.toString());
+                            })
+                            //获取失败
+                            .catch(error=>{
+                                console.log(error);
+                                alert('网络错误，请稍后尝试');
+                            })
             console.log(this.temp)
             // this.temp=localStorage.getItem('text');
             this.editor = new Editor("#editor");
@@ -126,6 +128,11 @@
             this.editor.create();
             // this.editor.txt.html(this.temp);
             this.editor.$textElem.attr('contenteditable', false)
+            // console.log(this.temp)
+            // console.log("123123123")
+            // console.log(typeof localStorage.getItem('text'))
+            
+            
         }
     }
 

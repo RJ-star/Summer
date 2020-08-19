@@ -7,63 +7,45 @@
                         trigger="hover"
                         :hide-on-click="false" >
                                 <span class="el-dropdown-link">
-
+                                    {{ username }}
                                     <div class="block"><el-avatar :size="50" :src="circleUrl"></el-avatar></div>
                                     <div class="block" v-for="size in sizeList" :key="size">
                                        <el-avatar :size="size" :src="circleUrl"></el-avatar>
                                     </div>
-                                    <!--                <i class="el-icon-arrow-down el-icon&#45;&#45;right"></i>-->
                                 </span>
                     <el-dropdown-menu slot="dropdown">
-                        <el-dropdown-item>{{username}}</el-dropdown-item>
-                        <el-dropdown-item>我的消息</el-dropdown-item>
-                        <el-dropdown-item>设置</el-dropdown-item>
+                        <el-dropdown-item @click.native="gotoMail">我的消息</el-dropdown-item>
+                        <el-dropdown-item @click.native="gotoUserprofile">设置</el-dropdown-item>
                         <el-dropdown-item divided
                                           @click.native="logout">退出登录</el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>
+                <br>
+                <br>
                 <div>
-                    <!-- 我是样例菜单 -->
                     <el-menu default-active="1-4-1"
                              class="el-menu-vertical-demo"
                              @open="handleOpen"
                              :collapse="isCollapse">
-                        <!--                        <el-submenu index="1">-->
-                        <!--                            <template slot="title">-->
-                        <!--                                <i class="el-icon-document"></i>-->
-                        <!--                                <span slot="title">工作台页面</span>-->
-                        <!--                            </template>-->
-                        <!--                            <el-menu-item-group>-->
-                        <!--                                <span slot="title">分组一</span>-->
-                        <!--                                <el-menu-item index="1-1">选项1</el-menu-item>-->
-                        <!--                                <el-menu-item index="1-2">选项2</el-menu-item>-->
-                        <!--                            </el-menu-item-group>-->
-                        <!--                            <el-menu-item-group title="分组2">-->
-                        <!--                                <el-menu-item index="1-3">选项3</el-menu-item>-->
-                        <!--                            </el-menu-item-group>-->
-                        <!--                            <el-submenu index="1-4">-->
-                        <!--                                <span slot="title">选项4</span>-->
-                        <!--                                <el-menu-item index="1-4-1">选项1</el-menu-item>-->
-                        <!--                            </el-submenu>-->
-                        <!--                        </el-submenu>-->
                         <el-button round @click="gotoCreateDoc">新建文档</el-button>
-                        <el-button type="primary" round>使用模板</el-button>
-                        <el-menu-item index="1">
+                        <br>
+                        <br>
+                        <el-button type="primary" round @click="gotoPatterns">使用模板</el-button>
+                        <br>
+                        <br>
+                        <el-menu-item index="1" @click="gotoRecent" disabled>
                             <i class="el-icon-s-platform"></i>
                             <span slot="title">工作台</span>
                         </el-menu-item>
-                        <el-menu-item index="2" @click="gotoDesktop">
-                            <i class="el-icon-menu"></i>
-                            <span slot="title">我的桌面</span>
-                        </el-menu-item>
-                        <el-menu-item index="3">
-                            <i class="el-icon-document"></i>
+                        <el-menu-item index="2" @click="gotoTeams">
+                            <i class="el-icon-s-promotion"></i>
                             <span slot="title">团队空间</span>
                         </el-menu-item>
-                        <el-menu-item index="4" @click="gotoBin">
-                            <i class="el-icon-delete" ></i>
+                        <el-menu-item index="3" @click="gotoBin">
+                            <i class="el-icon-delete"></i>
                             <span slot="title">回收站</span>
                         </el-menu-item>
+
                     </el-menu>
                 </div>
             </el-aside>
@@ -234,9 +216,9 @@
                     favorite_id:''
                 },
                 navList:[
-                    {name:'/Recent',navItem:'最近文件'},
-                    {name:'/User',navItem:'我创建的文件'},
-                    {name:'/Favorite',navItem:'我的收藏'}
+                    {name:'/user/Recent',navItem:'最近文件'},
+                    {name:'/user/User',navItem:'我创建的文件'},
+                    {name:'/user/Favorite',navItem:'我的收藏'}
                 ],
                 editObj:{
                     // date: '',
@@ -275,14 +257,9 @@
             handleSelect(key, keyPath) {
                 console.log(key, keyPath);
             },
-            gotoRecent() {
+            gotoUser() {
                 this.$router.push({
-                    path: "/user/Recent"
-                });
-            },
-            gotoDesktop() {
-                this.$router.push({
-                    path: "/user/Desktop"
+                    path: "/user/user"
                 });
             },
             gotoBin() {
@@ -290,9 +267,34 @@
                     path: "/user/Bin"
                 });
             },
+			gotoPatterns() {
+				this.$router.push({
+				path: "/user/Patterns"
+				});
+			},
             gotoCreateDoc() {
                 this.$router.push({
                     path: "/user/CreateDoc"
+                });
+            },
+            gotoMail:function() {
+                this.$router.push({
+                    path: "/user/Mail"
+                });
+            },
+            gotoUserprofile:function()
+            {this.$router.push({
+                    path:"/user/Userprofile"
+                })
+            },
+            gotoRecent() {
+                this.$router.push({
+                    path: "/user/Recent"
+                });
+            },
+            gotoTeams() {
+                this.$router.push({
+                    path: "/user/Teams"
                 });
             },
             share(index, row){

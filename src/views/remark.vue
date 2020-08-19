@@ -75,7 +75,7 @@
                 console.log(row)
                 localStorage.setItem('user_id',row.nickname)
                 this.$router.push({
-                    path:'/Message'
+                    path:'/user/Message'
                 })
             },
             submit(){

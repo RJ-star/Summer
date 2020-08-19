@@ -14,7 +14,7 @@
               </span>
                     <el-dropdown-menu slot="dropdown">
                         <el-dropdown-item>{{username}}</el-dropdown-item>
-                        <el-dropdown-item>我的消息</el-dropdown-item>
+                        <el-dropdown-item divided>我的消息</el-dropdown-item>
                         <el-dropdown-item>设置</el-dropdown-item>
                         <el-dropdown-item divided
                                           @click.native="logout">退出登录</el-dropdown-item>
@@ -44,9 +44,7 @@
                         <!--                                <el-menu-item index="1-4-1">选项1</el-menu-item>-->
                         <!--                            </el-submenu>-->
                         <!--                        </el-submenu>-->
-                        <el-button round @click="gotoCreateDoc">新建文档</el-button>
-                        <el-button type="primary" round>使用模板</el-button>
-                        <el-menu-item index="1" @click="gotoRecent">
+                        <el-menu-item index="1">
                             <i class="el-icon-s-platform"></i>
                             <span slot="title">工作台</span>
                         </el-menu-item>
@@ -58,11 +56,27 @@
                             <i class="el-icon-document"></i>
                             <span slot="title">团队空间</span>
                         </el-menu-item>
-                        <el-menu-item index="4" @click="gotoBin">
+                        <el-menu-item index="4">
                             <i class="el-icon-delete"></i>
                             <span slot="title">回收站</span>
                         </el-menu-item>
                     </el-menu>
+                    <el-card>
+                        <p><el-button type="primary" @click="gotoCreateDoc">新建</el-button></p>
+                        <p><el-button>模板库</el-button></p>
+                        <el-upload
+                                class="upload-demo"
+                                action="https://jsonplaceholder.typicode.com/posts/"
+                                :on-preview="handlePreview"
+                                :on-remove="handleRemove"
+                                :before-remove="beforeRemove"
+                                multiple
+                                :limit="3"
+                                :on-exceed="handleExceed"
+                                :file-list="fileList">
+                            <el-button >导入</el-button>
+                        </el-upload>
+                    </el-card>
                 </div>
             </el-aside>
 
@@ -74,13 +88,16 @@
                     <!--            <i v-show="isCollapse" class="el-icon-d-arrow-right"></i>-->
                     <!--          </div>-->
                     <!-- 我是样例菜单 -->
-                    <el-menu default-active="1"
+
+                    <el-menu default-active="activeIndex"
                              class="el-menu-demo tab-page"
-                             mode="horizontal"
+                             router mode="horizontal"
                              @select="handleSelect"
-                             active-text-color="#409EFF">
-<!--                        <el-menu-item index="1" @click="gotoRecent">最近文件</el-menu-item>-->
-<!--                        <el-menu-item index="2">我创建的文件</el-menu-item>-->
+                             >
+                            <el-menu-item v-for="(item,i) in navList" :key="i" :index="item.name">
+                                {{ item.navItem }}
+                            </el-menu-item>
+                    </el-menu>
                         <!--                        <el-submenu index="2">-->
                         <!--                            <template slot="title">我的工作台</template>-->
                         <!--                            <el-menu-item index="2-1">选项1</el-menu-item>-->
@@ -111,7 +128,6 @@
                         <!--            </el-col>-->
 
 
-                    </el-menu>
 
                     <!--          <div class="app-header-userinfo">-->
                     <!--            <el-dropdown trigger="hover"-->
@@ -136,15 +152,58 @@
                     <template>
                         <el-main class="app-body">
                             <el-row :gutter="20">
-                                <el-col :span="6" v-for="item in items" :key="item.id">
+                                <el-col :span="6" v-for="item in tableData" :key="item.id">
                                     <div class="grid-content bg-purple">
                                         <el-card class="card" shadow="hover">
-                                            <img class="image" src="../assets/word.png">
+                                            <img class="image" src="../../assets/word.png">
                                             <div>
                                                 <span>{{item.name}}</span>
-                                                <div class="bottom clearfix">
-                                                    <time class="time">{{ item.time }}</time>
-                                                </div>
+                                                <el-dropdown>
+                                                  <span class="el-dropdown-link">
+                                                    <i class="el-icon-more"></i>
+                                                  </span>
+                                                  <el-dropdown-menu slot="dropdown">
+                                                <template slot-scope="scope">
+                                                    <el-dropdown-item><i class="el-icon-edit" @click="editDoc(scope.$index, scope.row)"></i>编辑</el-dropdown-item>
+                                                    <el-dropdown-item divided><i class="el-icon-delete" @click="deleteDoc(scope.$index, scope.row)"></i>删除</el-dropdown-item>
+                                                    <el-dropdown-item divided><i class="el-icon-share" @click="share(scope.$index, scope.row)"></i>分享</el-dropdown-item>
+                                                    <el-dropdown-item divided><i class="el-icon-star-off" @click="favorite(scope.$index, scope.row)"></i>收藏</el-dropdown-item>
+                                                </template>
+                                                  </el-dropdown-menu>
+                                                </el-dropdown>
+                                                <el-dialog
+                                                    title="提示:将文档ID分享给他人"
+                                                    :visible.sync="dialogVisible"
+                                                    width="30%"
+                                                    :before-close="handleCloseDialog">
+                                                <span>设置文档权限（默认开启查看权限）：</span>
+                                                <br><br>
+                                                <span>编辑权限</span>
+                                                <el-radio v-model="radio1" label="1">有</el-radio>
+                                                <el-radio v-model="radio1" label="0">无</el-radio>
+                                                <br><br>
+                                                <span>分享权限</span>
+                                                <el-radio v-model="radio2" label="1">有</el-radio>
+                                                <el-radio v-model="radio2" label="0">无</el-radio>
+                                                <br><br>
+                                                <span>评论权限</span>
+                                                <el-radio v-model="radio3" label="1">有</el-radio>
+                                                <el-radio v-model="radio3" label="0">无</el-radio>
+                        <!--                        <el-radio v-model="radio" label="1">仅查看</el-radio>-->
+                        <!--                        <el-radio v-model="radio" label="2">可编辑</el-radio>-->
+                                                <br><br>
+                                                文档名：
+                                                <el-input v-model="editObj.address" :disabled="true"></el-input>
+                                                <br><br>
+                                                文档ID：
+                                                <el-input v-model="editObj.id" :disabled="true"></el-input>
+                        <!--                        <br><br>-->
+                                                <span slot="footer" class="dialog-footer">
+                                                            <el-button @click="dialogVisible = false">取 消</el-button>
+                                                            <el-button type="primary" @click="dialogVisible = false, checkShare(editObj.id)">确 定</el-button>
+                                                </span>
+                                            </el-dialog>
+
                                             </div>
                                         </el-card>
                                     </div>
@@ -159,40 +218,269 @@
 </template>
 
 <script>
+    import axios from "axios";
+
     export default {
         name: 'Container',
         data() {
             return {
+              navList:[
+                    {name:'/Recent',navItem:'最近文件'},
+                    {name:'/User',navItem:'我创建的文件'},
+                    {name:'/Favorite',navItem:'我的收藏'}
+                ],
+              editObj:{
+                    date: '',
+                    name: '',
+                    address: '',
+                    id:''
+                },
                 currentDate: new Date(),
                 username: '',
+                dialogVisible: false,
+                radio1: '1',
+                radio2: '1',
+                radio3: '1',
+                tmp:'',
                 isCollapse: false,
                 circleUrl: "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png",
-                items: [
+                tableData: [
                     {
-                        id: '1',
-                        name: 'word',
-                        time: '2018-11-11'
-                    }, {
-                        id: '2',
-                        name: 'excel',
-                        time: '2018-11-11'
-                    }, {
-                        id: '3',
-                        name: 'powerpoint',
-                        time: '2018-11-11'
-                    }, {
-                        id: '3',
-                        name: 'powerpoint',
-                        time: '2018-11-11'
-                    }, {
-                        id: '3',
-                        name: 'powerpoint',
-                        time: '2018-11-11'
+                        id: '',
+                        name: '',
                     }
                 ]
             }
         },
         methods: {
+            gotoCreateDoc() {
+                this.$router.push({
+                    path: "/user/CreateDoc"
+                });
+            },
+          favorite(index,row){
+                console.log(row.id);
+                axios.post('/apis/user/add_favorite',{
+                    add_favorite:"add_favorite",
+                    file_id:row.id
+                })
+                .then(response=>{
+                    if (response.data.status===1)
+                        alert('收藏成功')
+                    else if (response.data.status===0)
+                        alert('你已经收藏了此文档')
+                    else alert('收藏失败，请稍后再试')
+                })
+            },
+            share(index, row){
+                this.dialogVisible=true;
+                console.log(row.id);
+                this.listIndex=index;
+                this.editObj=row
+            },
+            checkShare(id){
+                console.log(id);
+                console.log(this.radio1,this.radio2,this.radio3)
+                axios.post('/apis/user/shareFile',{
+                    shareFile: "shareFile",
+                    file_id:id
+                })
+                .then(response=>{
+                    if (response.data.status===0) {
+                        axios.post('/apis/user/setGeneralAuthority',{
+                            setGenAuthor: "setGenAuthor",
+                            file_id:id,
+                            read_file:1,
+                            write_file:this.radio1,
+                            share_file:this.radio2,
+                            review_file:this.radio3
+                        })
+                    }
+                    else {
+                        console('Wrong')
+                        alert('分享失败')
+                    }
+                })
+            },
+          created(){
+            axios.post('/apis/user/getstatus')
+                .then(res=>{
+                    if (res.data.status===0) {
+                        this.username=res.data.username
+                        axios.post('/apis/user/myFile',{
+                            myfile: "myfile"
+                        })
+                            //then获取成功；response成功后的返回值（对象）
+                            .then(response=>{
+                                console.log(response);
+                                this.tableData.pop();
+                                for (let i=0, len=response.data.fileNameSet.length;i<len;i++) {
+                                    this.temp.id=response.data.fileIdSet[i];
+                                    this.temp.address=response.data.fileNameSet[i];
+                                    this.tableData.push({id:this.temp.id,address:this.temp.address})
+                                }
+                            })
+                            //获取失败
+                            .catch(error=>{
+                                console.log(error);
+                                alert('网络错误，请稍后尝试');
+                            })
+                    }
+                    else {
+                        this.$router.push({
+                            path: "/user/login"
+                        })
+                        alert('请登录')
+                    }
+                })
+
+        },
+            deleteDoc(index,row) {
+                console.log(row.id)
+                axios.post('/apis/user/moveto_recyclebin',{
+                    delete_file: "delete_file",
+                    file_id:row.id,
+                })
+                    // eslint-disable-next-line no-unused-vars
+                    .then(response => {
+                        if (response.data.status===0) {
+                            alert('删除成功')
+                            this.$router.push({path: '/user/User'})
+                            window.location.reload()
+                        }
+                        else
+                            alert('删除失败，请稍后再试')
+                        // if (response.data.status === 0) {
+                        //     this.$router.push({path: '/Recent'})
+                        //     window.location.reload()
+                        // } else {
+                        //     return false
+                        // }
+                    })
+            },
+            editDoc(index,row) {
+                console.log(index,row.id)
+                axios.post('/apis/user/checkSpecificAuthority',{
+                    checkSpecificAuthority:"checkSpecificAuthority",
+                    file_id:row.id
+                })
+                    .then(response=>{
+                        if (response.data.status===0) {
+                            if (response.data.write===0) {
+                                console.log('Wrong response')
+                                this.$router.push({path: '/user/ops'})
+                            }
+                            else {
+                                console.log('success')
+                                axios.post('/apis/user/fileEditStatus',{
+                                    freeFile: "freeOrNot",
+                                    file_id:row.id
+                                })
+                                    .then(re=>{
+                                        if (re.data.status===1) {
+                                            console.log('Wrong 123')
+                                            this.$router.push({path: '/user/ops'})
+                                        }
+                                        else {
+                                            console.log('success')
+                                            //jump
+                                            localStorage.setItem('file_id',re.data.file_id)
+                                            axios.post('/apis/user/applyEditFile',{
+                                                editFile:"editFile",
+                                                file_id:localStorage.getItem('file_id')
+                                            })
+                                                //then获取成功；response成功后的返回值（对象）
+                                                .then(response=>{
+                                                    console.log(response);
+                                                    this.tmp=response.data.file_text;
+                                                })
+                                                //获取失败
+                                                .catch(error=>{
+                                                    console.log(error);
+                                                    alert('网络错误，请稍后尝试');
+                                                })
+                                            localStorage.setItem('text',this.tmp)
+                                            axios.post('/apis/user/postModifiedFile',{
+                                                browseFile:'browseFile',
+                                                file_id:localStorage.getItem('file_id')
+                                            })
+                                            this.$router.push({path:'/user/edit'})
+                                        }
+                                    })
+                            }
+                        }
+
+                        if (response.data.status===1) {//验证通用权限
+                            axios.post('/apis/user/checkGeneralAuthority',{
+                                checkGerneralAuthority:"checkGerneralAuthority",
+                                file_id:row.id
+                            })
+                                .then(res=>{
+                                    if (res.data.status===0) {
+                                        console.log('success')
+                                        axios.post('/apis/user/fileEditStatus',{
+                                            freeFile: "freeOrNot",
+                                            file_id:row.id
+                                        })
+                                            .then(re=>{
+                                                if (re.data.status===1) {
+                                                    console.log('Wrong')
+                                                    this.$router.push({path: '/user/ops'})
+                                                }
+                                                else {
+                                                    console.log('success 123')
+                                                    //jump
+
+                                                    localStorage.setItem('file_id',re.data.file_id)
+                                                    axios.post('/apis/user/applyEditFile',{
+                                                        editFile:"editFile",
+                                                        file_id:localStorage.getItem('file_id')
+                                                    })
+                                                        //then获取成功；response成功后的返回值（对象）
+                                                        .then(response=>{
+                                                            console.log(response);
+                                                            this.tmp=response.data.file_text;
+                                                        })
+                                                        //获取失败
+                                                        .catch(error=>{
+                                                            console.log(error);
+                                                            alert('网络错误，请稍后尝试');
+                                                        })
+                                                    localStorage.setItem('text',this.tmp)
+                                                    axios.post('/apis/user/postModifiedFile',{
+                                                        browseFile:'browseFile',
+                                                        file_id:localStorage.getItem('file_id')
+                                                    })
+                                                    this.$router.push({path:'/user/edit'})
+                                                }
+                                            })
+                                    }
+                                    else {
+                                        console.log('Wrong')
+                                        this.$router.push({path: '/user/ops'})
+                                    }
+                                })
+                        }
+
+                    })
+            },
+          handleCloseDialog(done) {
+                this.$confirm('确认关闭？')
+                    .then(() => {
+                        done();
+                    })
+                    .catch(() => {});
+            },
+            handleRemove(file) {
+                console.log(file);
+            },
+            handlePreview(file) {
+                console.log(file);
+            },
+            handleExceed(files) {
+                this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length} 个文件`);
+            },
+
             toggleSideBar() {
                 this.isCollapse = !this.isCollapse
             },
@@ -200,7 +488,7 @@
                 this.$confirm('确认退出?', '提示', {})
                     .then(() => {
                         sessionStorage.removeItem('user');
-                        this.$router.push('/login');
+                        this.$router.push('/user/login');
                     })
                     .catch(() => { });
             },
@@ -217,16 +505,6 @@
                 this.$router.push({
                     path: "/Recent"
                 });
-            },
-            gotoBin() {
-                this.$router.push({
-                    path: "/Bin"
-                });
-            },
-            gotoCreateDoc() {
-                this.$router.push({
-                    path: "/CreateDoc"
-                });
             }
         },
         mounted: function () {
@@ -240,6 +518,13 @@
 </script>
 
 <style>
+.el-dropdown-link {
+    cursor: pointer;
+    color: #409EFF;
+  }
+  .el-icon-arrow-down {
+    font-size: 12px;
+  }
     .el-row {
         margin-bottom: 20px;
     &:last-child {

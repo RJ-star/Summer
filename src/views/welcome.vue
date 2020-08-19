@@ -19,12 +19,12 @@
             },
             gotoRegister(){
                 this.$router.push({
-                    path:'/Register'
+                    path:'/user/yu'
                 })
             },
             gotoLogin(){
                 this.$router.push({
-                    path:'/Login'
+                    path:'/user/yulog'
                 })
             }
         }
